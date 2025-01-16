@@ -19,7 +19,41 @@ const resources = {
         refresh: 'Refresh',
         setDate: 'Set Date',
         setReminder: 'Set Reminder',
-        loading: 'Loading...'
+        loading: 'Loading...',
+        auth: {
+          login: {
+            title: 'Login',
+            email: 'Email',
+            password: 'Password',
+            submit: 'Login',
+            forgotPassword: 'Forgot Password?',
+            noAccount: 'Don\'t have an account?',
+            signUp: 'Sign up'
+          },
+          register: {
+            title: 'Register',
+            email: 'Email',
+            password: 'Password',
+            confirmPassword: 'Confirm Password',
+            submit: 'Register',
+            hasAccount: 'Already have an account?',
+            signIn: 'Sign in'
+          },
+          forgotPassword: {
+            title: 'Reset your password',
+            description: 'Enter your email address and we\'ll send you a link to reset your password.',
+            submit: 'Send reset link',
+            success: 'If an account exists with that email, we\'ve sent a password reset link.',
+            backToLogin: 'Back to login'
+          },
+          validation: {
+            emailRequired: 'Email is required',
+            emailInvalid: 'Please enter a valid email',
+            passwordRequired: 'Password is required',
+            passwordMinLength: 'Password must be at least 6 characters',
+            passwordMatch: 'Passwords must match'
+          }
+        }
       },
       navigation: {
         dashboard: 'Dashboard',
@@ -154,7 +188,30 @@ const resources = {
       },
       profile: {
         title: 'Profile',
+        defaultName: 'User',
         menu: {
+          fullName: {
+            title: 'Full Name',
+            label: 'Your full name',
+            placeholder: 'Enter your full name',
+            setName: 'Set your name'
+          },
+          username: {
+            title: 'Username',
+            label: 'Your username',
+            placeholder: 'Enter your username',
+            setUsername: 'Set your username'
+          },
+          password: {
+            title: 'Change Password',
+            subtitle: 'Update your password',
+            current: 'Current Password',
+            new: 'New Password',
+            confirm: 'Confirm New Password',
+            currentPlaceholder: 'Enter current password',
+            newPlaceholder: 'Enter new password',
+            confirmPlaceholder: 'Confirm new password'
+          },
           notifications: {
             title: 'Notifications',
             subtitle: 'Manage your notification preferences'
@@ -174,7 +231,14 @@ const resources = {
           settings: {
             title: 'Settings',
             subtitle: 'App preferences and more'
-          }
+          },
+          logout: 'Logout',
+          logoutSubtitle: 'Sign out from your account'
+        },
+        notifications: {
+          nameUpdated: 'Your name has been updated successfully',
+          usernameUpdated: 'Your username has been updated successfully',
+          passwordUpdated: 'Your password has been updated successfully'
         }
       },
       reminders: {
@@ -213,7 +277,41 @@ const resources = {
         refresh: 'Yenile',
         setDate: 'Tarih Seç',
         setReminder: 'Hatırlatıcı Ekle',
-        loading: 'Yükleniyor...'
+        loading: 'Yükleniyor...',
+        auth: {
+          login: {
+            title: 'Giriş Yap',
+            email: 'E-posta',
+            password: 'Şifre',
+            submit: 'Giriş Yap',
+            forgotPassword: 'Şifremi Unuttum',
+            noAccount: 'Hesabın yok mu?',
+            signUp: 'Kayıt ol'
+          },
+          register: {
+            title: 'Kayıt Ol',
+            email: 'E-posta',
+            password: 'Şifre',
+            confirmPassword: 'Şifre Tekrar',
+            submit: 'Kayıt Ol',
+            hasAccount: 'Zaten hesabın var mı?',
+            signIn: 'Giriş yap'
+          },
+          forgotPassword: {
+            title: 'Şifreni sıfırla',
+            description: 'E-posta adresini gir ve sana şifre sıfırlama bağlantısı gönderelim.',
+            submit: 'Sıfırlama bağlantısı gönder',
+            success: 'Bu e-posta ile bir hesap varsa, şifre sıfırlama bağlantısı gönderdik.',
+            backToLogin: 'Giriş sayfasına dön'
+          },
+          validation: {
+            emailRequired: 'E-posta zorunludur',
+            emailInvalid: 'Geçerli bir e-posta adresi giriniz',
+            passwordRequired: 'Şifre zorunludur',
+            passwordMinLength: 'Şifre en az 6 karakter olmalıdır',
+            passwordMatch: 'Şifreler eşleşmiyor'
+          }
+        }
       },
       navigation: {
         dashboard: 'Ana Sayfa',
@@ -348,7 +446,30 @@ const resources = {
       },
       profile: {
         title: 'Profil',
+        defaultName: 'Kullanıcı',
         menu: {
+          fullName: {
+            title: 'Ad Soyad',
+            label: 'Adınız ve soyadınız',
+            placeholder: 'Adınızı ve soyadınızı girin',
+            setName: 'İsminizi belirleyin'
+          },
+          username: {
+            title: 'Kullanıcı Adı',
+            label: 'Kullanıcı adınız',
+            placeholder: 'Kullanıcı adınızı girin',
+            setUsername: 'Kullanıcı adı belirleyin'
+          },
+          password: {
+            title: 'Şifre Değiştir',
+            subtitle: 'Şifrenizi güncelleyin',
+            current: 'Mevcut Şifre',
+            new: 'Yeni Şifre',
+            confirm: 'Yeni Şifre Tekrar',
+            currentPlaceholder: 'Mevcut şifrenizi girin',
+            newPlaceholder: 'Yeni şifrenizi girin',
+            confirmPlaceholder: 'Yeni şifrenizi tekrar girin'
+          },
           notifications: {
             title: 'Bildirimler',
             subtitle: 'Bildirim tercihlerini yönet'
@@ -368,7 +489,14 @@ const resources = {
           settings: {
             title: 'Ayarlar',
             subtitle: 'Uygulama tercihleri ve daha fazlası'
-          }
+          },
+          logout: 'Çıkış Yap',
+          logoutSubtitle: 'Hesabından çıkış yap'
+        },
+        notifications: {
+          nameUpdated: 'İsminiz başarıyla güncellendi',
+          usernameUpdated: 'Kullanıcı adınız başarıyla güncellendi',
+          passwordUpdated: 'Şifreniz başarıyla güncellendi'
         }
       },
       reminders: {

@@ -156,28 +156,54 @@ function Dashboard() {
   }
 
   const loadDashboardData = async () => {
-    const startDate = new Date()
-    startDate.setMonth(selectedMonth)
-    startDate.setDate(1)
-    
-    const endDate = new Date()
-    endDate.setMonth(selectedMonth + 1)
-    endDate.setDate(0)
+    try {
+      const startDate = new Date()
+      startDate.setMonth(selectedMonth)
+      startDate.setDate(1)
+      
+      const endDate = new Date()
+      endDate.setMonth(selectedMonth + 1)
+      endDate.setDate(0)
 
-    const dateFilters = {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString()
+      const dateFilters = {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      }
+
+      await Promise.all([
+        loadStats(dateFilters),
+        loadTransactions(dateFilters)
+      ])
+    } catch (err) {
+      if (err.message === 'User not authenticated') {
+        navigate('/login');
+        return;
+      }
+      setError(err.message);
     }
-
-    await Promise.all([
-      loadStats(dateFilters),
-      loadTransactions(dateFilters)
-    ])
   }
 
   useEffect(() => {
-    loadDashboardData()
-  }, [selectedMonth])
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        if (isMounted) {
+          await loadDashboardData();
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedMonth]);
 
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
 
@@ -214,78 +240,85 @@ function Dashboard() {
   ]
 
   return (
-    <div className="px-4 pb-20">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-semibold text-white">{t('dashboard.welcome')} Akin</h1>
-          <button 
-            onClick={loadDashboardData}
-            className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
-          >
-            <ArrowPathIcon className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
-
-      {/* Stats */}
-      {statsLoading ? (
-        <div className="h-[448px] bg-[#1e2b4a] rounded-[32px]">
-          <ContentLoading />
-        </div>
-      ) : (
-        <motion.div className="space-y-4" layout>
-          <StatItem {...dashboardStats[0]} />
-          {isBalanceExpanded && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-4 pl-4 border-l-2 border-violet-500/30 ml-5"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="px-4 pb-20">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-semibold text-white">{t('dashboard.welcome')} Akin</h1>
+            <button 
+              onClick={loadDashboardData}
+              className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
             >
-              {dashboardStats.slice(1).map((stat, index) => (
-                <StatItem key={index} {...stat} />
-              ))}
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-
-      {/* Recent Transactions */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">{t('dashboard.recentTransactions')}</h3>
-          <button 
-            onClick={() => loadTransactions({
-              startDate: new Date(new Date().setMonth(selectedMonth, 1)).toISOString(),
-              endDate: new Date(new Date().setMonth(selectedMonth + 1, 0)).toISOString()
-            })}
-            className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
-          >
-            <ArrowPathIcon className="w-4 h-4" />
-          </button>
+              <ArrowPathIcon className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-        
-        {transactionsLoading ? (
-          <div className="min-h-[200px] bg-[#1e2b4a] rounded-2xl">
+
+        <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
+
+        {/* Stats */}
+        {statsLoading ? (
+          <div className="h-[448px] bg-[#1e2b4a] rounded-[32px]">
             <ContentLoading />
           </div>
-        ) : recentTransactions.length > 0 ? (
-          <div className="space-y-3">
-            {recentTransactions.map(transaction => (
-              <RecentTransactionCard key={transaction.id} transaction={transaction} />
-            ))}
-          </div>
         ) : (
-          <EmptyState
-            title={t('dashboard.emptyState.title')}
-            description={t('dashboard.emptyState.description')}
-            t={t}
-          />
+          <motion.div className="space-y-4" layout>
+            <StatItem {...dashboardStats[0]} />
+            {isBalanceExpanded && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-4 pl-4 border-l-2 border-violet-500/30 ml-5"
+              >
+                {dashboardStats.slice(1).map((stat, index) => (
+                  <StatItem key={index} {...stat} />
+                ))}
+              </motion.div>
+            )}
+          </motion.div>
         )}
+
+        {/* Recent Transactions */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">{t('dashboard.recentTransactions')}</h3>
+            <button 
+              onClick={() => loadTransactions({
+                startDate: new Date(new Date().setMonth(selectedMonth, 1)).toISOString(),
+                endDate: new Date(new Date().setMonth(selectedMonth + 1, 0)).toISOString()
+              })}
+              className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
+            >
+              <ArrowPathIcon className="w-4 h-4" />
+            </button>
+          </div>
+          
+          {transactionsLoading ? (
+            <div className="min-h-[200px] bg-[#1e2b4a] rounded-2xl">
+              <ContentLoading />
+            </div>
+          ) : recentTransactions.length > 0 ? (
+            <div className="space-y-3">
+              {recentTransactions.map(transaction => (
+                <RecentTransactionCard key={transaction.id} transaction={transaction} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title={t('dashboard.emptyState.title')}
+              description={t('dashboard.emptyState.description')}
+              t={t}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

@@ -32,6 +32,11 @@ class BudgetService {
   // Dashboard data
   async getDashboardData(filters = {}) {
     try {
+      const user = await this.auth.getCurrentUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const transactions = await this.transactions.getAll({ ...filters, limit: 10 });
 
       return {
@@ -39,6 +44,11 @@ class BudgetService {
       };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      if (error.message === 'User not authenticated') {
+        // Redirect to login or handle auth error
+        window.location.href = '/login';
+        return { recentTransactions: [] };
+      }
       throw error;
     }
   }
@@ -117,6 +127,11 @@ class BudgetService {
   // Dashboard summary cards
   async getSummaryCards(filters = {}) {
     try {
+      const user = await this.auth.getCurrentUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const stats = await this.transactions.getStats(filters);
 
       return {
@@ -127,6 +142,16 @@ class BudgetService {
       };
     } catch (error) {
       console.error('Error fetching summary cards:', error);
+      if (error.message === 'User not authenticated') {
+        // Redirect to login or handle auth error
+        window.location.href = '/login';
+        return {
+          totalBalance: 0,
+          totalIncome: 0,
+          totalExpenses: 0,
+          regularExpenses: 0
+        };
+      }
       throw error;
     }
   }

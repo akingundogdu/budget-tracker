@@ -117,7 +117,11 @@ function AddTransactionPage() {
   };
 
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div className="min-h-screen bg-[#0f172a]">
         <div className="p-6">
           {/* Header */}
@@ -187,7 +191,7 @@ function AddTransactionPage() {
             <div className="w-8 h-8 bg-gray-600/20 rounded-lg flex items-center justify-center mr-3">
               <BellIcon className="w-5 h-5 text-gray-400" />
             </div>
-            <div className="flex-1">
+            <div>
               <span className="text-white/60">{t('common.setReminder')}</span>
               {reminderSettings.enabled && (
                 <p className="text-sm text-white/40 mt-1">
@@ -282,7 +286,7 @@ function AddTransactionPage() {
           />
         )}
       </AnimatePresence>
-    </>
+    </motion.div>
   )
 }
 
