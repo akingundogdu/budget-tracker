@@ -5,19 +5,16 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   BanknotesIcon,
-  ChartBarIcon,
   ArrowPathIcon,
   CalendarDaysIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   PlusIcon
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
+import { budgetService } from '../services'
 
 function MonthSelector({ selectedMonth, onMonthChange }) {
   const { t } = useLanguage()
   
-  // Scroll to selected month when component mounts or month changes
   const scrollToSelectedMonth = () => {
     const selectedElement = document.getElementById(`month-${selectedMonth}`)
     if (selectedElement) {
@@ -29,7 +26,6 @@ function MonthSelector({ selectedMonth, onMonthChange }) {
     }
   }
 
-  // Call scrollToSelectedMonth when component mounts and when selectedMonth changes
   React.useEffect(() => {
     scrollToSelectedMonth()
   }, [selectedMonth])
@@ -61,7 +57,7 @@ function MonthSelector({ selectedMonth, onMonthChange }) {
   )
 }
 
-function StatItem({ title, amount, icon: Icon, trend, color }) {
+function StatItem({ title, amount, icon: Icon, color }) {
   return (
     <div className="flex items-start justify-between p-5 bg-[#1e2b4a] rounded-[32px]">
       <div className="flex items-center gap-3">
@@ -88,14 +84,16 @@ function RecentTransactionCard({ transaction }) {
         </div>
         <div>
           <h4 className="text-white font-medium">{transaction.description}</h4>
-          <p className="text-white/60 text-sm">{t(`expenses.categories.${transaction.category.toLowerCase()}`)}</p>
+          <p className="text-white/60 text-sm">{transaction.categories?.name}</p>
         </div>
       </div>
       <div className="text-right">
         <p className={`font-medium ${transaction.type === 'expense' ? 'text-red-500' : 'text-green-500'}`}>
           {transaction.type === 'expense' ? '-' : '+'}{formatMoney(transaction.amount)}
         </p>
-        <p className="text-white/60 text-sm">{transaction.date}</p>
+        <p className="text-white/60 text-sm">
+          {new Date(transaction.date).toLocaleDateString()}
+        </p>
       </div>
     </div>
   )
@@ -125,64 +123,84 @@ function Dashboard() {
   const { t, formatMoney } = useLanguage()
   const navigate = useNavigate()
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [recentTransactions] = useState([])
-
-  // Filter transactions based on selected month
-  const filteredTransactions = recentTransactions.filter(transaction => {
-    const transactionDate = new Date(transaction.date)
-    return transactionDate.getMonth() === selectedMonth
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [dashboardData, setDashboardData] = useState({
+    recentTransactions: [],
+    stats: null,
+    upcomingReminders: [],
+    categories: []
   })
 
-  // Calculate stats based on filtered transactions
-  const calculateStats = () => {
-    const totalIncome = filteredTransactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    const totalExpenses = filteredTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    return [
-      {
-        title: t('dashboard.stats.totalBalance.title'),
-        amount: formatMoney(totalIncome - totalExpenses),
-        icon: BanknotesIcon,
-        trend: 12.5,
-        color: 'bg-violet-500'
-      },
-      {
-        title: t('dashboard.stats.totalIncome.title'),
-        amount: formatMoney(totalIncome),
-        icon: ArrowTrendingUpIcon,
-        trend: 8.2,
-        color: 'bg-green-500'
-      },
-      {
-        title: t('dashboard.stats.totalExpenses.title'),
-        amount: formatMoney(totalExpenses),
-        icon: ArrowTrendingDownIcon,
-        trend: -5.1,
-        color: 'bg-red-500'
-      },
-      {
-        title: t('dashboard.stats.regularExpenses.title'),
-        amount: formatMoney(totalExpenses * 0.4), // Example calculation
-        icon: CalendarDaysIcon,
-        trend: 15.3,
-        color: 'bg-amber-500'
-      }
-    ]
+  useEffect(() => {
+    loadDashboardData()
+  }, [selectedMonth])
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+      const startDate = new Date()
+      startDate.setMonth(selectedMonth)
+      startDate.setDate(1)
+      
+      const endDate = new Date()
+      endDate.setMonth(selectedMonth + 1)
+      endDate.setDate(0)
+
+      const data = await budgetService.getDashboardData({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      })
+      
+      setDashboardData(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const stats = calculateStats()
+  if (loading) return <div className="p-4 text-white">Loading...</div>
+  if (error) return <div className="p-4 text-red-500">Error: {error}</div>
+
+  const { recentTransactions, stats } = dashboardData
+
+  const dashboardStats = [
+    {
+      title: t('dashboard.stats.totalBalance.title'),
+      amount: formatMoney(stats?.totalIncome - stats?.totalExpenses || 0),
+      icon: BanknotesIcon,
+      color: 'bg-violet-500'
+    },
+    {
+      title: t('dashboard.stats.totalIncome.title'),
+      amount: formatMoney(stats?.totalIncome || 0),
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-green-500'
+    },
+    {
+      title: t('dashboard.stats.totalExpenses.title'),
+      amount: formatMoney(stats?.totalExpenses || 0),
+      icon: ArrowTrendingDownIcon,
+      color: 'bg-red-500'
+    },
+    {
+      title: t('dashboard.stats.regularExpenses.title'),
+      amount: formatMoney((stats?.totalExpenses || 0) * 0.4),
+      icon: CalendarDaysIcon,
+      color: 'bg-amber-500'
+    }
+  ]
 
   return (
     <div className="px-4 pb-20">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-semibold text-white">{t('dashboard.title')}</h1>
-          <button className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors">
+          <button 
+            onClick={loadDashboardData}
+            className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
+          >
             <ArrowPathIcon className="w-4 h-4" />
           </button>
         </div>
@@ -192,7 +210,7 @@ function Dashboard() {
 
       {/* Stats */}
       <div className="space-y-4">
-        {stats.map((stat, index) => (
+        {dashboardStats.map((stat, index) => (
           <StatItem key={index} {...stat} />
         ))}
       </div>
@@ -200,9 +218,9 @@ function Dashboard() {
       {/* Recent Transactions */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-white mb-4">{t('dashboard.recentTransactions')}</h3>
-        {filteredTransactions.length > 0 ? (
+        {recentTransactions.length > 0 ? (
           <div className="space-y-3">
-            {filteredTransactions.map(transaction => (
+            {recentTransactions.map(transaction => (
               <RecentTransactionCard key={transaction.id} transaction={transaction} />
             ))}
           </div>
