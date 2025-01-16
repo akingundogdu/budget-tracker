@@ -7,10 +7,13 @@ import {
   BanknotesIcon,
   ArrowPathIcon,
   CalendarDaysIcon,
-  PlusIcon
+  PlusIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import { budgetService } from '../services'
+import { ContentLoading } from './Loading'
+import EmptyState from './EmptyState'
 
 function MonthSelector({ selectedMonth, onMonthChange }) {
   const { t } = useLanguage()
@@ -57,19 +60,35 @@ function MonthSelector({ selectedMonth, onMonthChange }) {
   )
 }
 
-function StatItem({ title, amount, icon: Icon, color }) {
+function StatItem({ title, amount, icon: Icon, color, isExpandable, isExpanded, onToggle }) {
   return (
-    <div className="flex items-start justify-between p-5 bg-[#1e2b4a] rounded-[32px]">
-      <div className="flex items-center gap-3">
-        <div className={`${color} w-10 h-10 rounded-2xl flex items-center justify-center`}>
-          <Icon className="w-5 h-5 text-white" />
+    <motion.div
+      className="flex flex-col"
+      layout
+    >
+      <div 
+        className={`flex items-start justify-between p-5 bg-[#1e2b4a] rounded-t-[32px] ${!isExpandable && 'rounded-b-[32px]'} cursor-pointer`}
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`${color} w-10 h-10 rounded-2xl flex items-center justify-center`}>
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <h3 className="text-white text-lg font-medium">{title}</h3>
+            <p className="text-white text-2xl font-semibold">{amount}</p>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <h3 className="text-white text-lg font-medium">{title}</h3>
-          <p className="text-white text-2xl font-semibold">{amount}</p>
-        </div>
+        {isExpandable && (
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDownIcon className="w-6 h-6 text-white/60" />
+          </motion.div>
+        )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -99,72 +118,67 @@ function RecentTransactionCard({ transaction }) {
   )
 }
 
-function EmptyState({ title, description, onAddClick, t }) {
-  return (
-    <div className="bg-[#1e2b4a] rounded-2xl p-8 text-center">
-      <div className="w-16 h-16 bg-[#243351] rounded-xl flex items-center justify-center mx-auto mb-4">
-        <BanknotesIcon className="w-8 h-8 text-white/60" />
-      </div>
-      <h3 className="text-white font-medium text-lg mb-2">{title}</h3>
-      <p className="text-white/60 mb-6">{description}</p>
-      <motion.button
-        whileTap={{ scale: 0.98 }}
-        onClick={onAddClick}
-        className="inline-flex items-center gap-2 bg-violet-500 text-white px-4 py-2 rounded-xl font-medium"
-      >
-        <PlusIcon className="w-5 h-5" />
-        <span>{t('expenses.addNew')}</span>
-      </motion.button>
-    </div>
-  )
-}
-
 function Dashboard() {
   const { t, formatMoney } = useLanguage()
   const navigate = useNavigate()
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [transactionsLoading, setTransactionsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dashboardData, setDashboardData] = useState({
     recentTransactions: []
   })
   const [summaryCards, setSummaryCards] = useState(null)
+  const [isBalanceExpanded, setIsBalanceExpanded] = useState(false)
+
+  const loadTransactions = async (dateFilters) => {
+    try {
+      setTransactionsLoading(true)
+      const data = await budgetService.getDashboardData(dateFilters)
+      setDashboardData(data)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setTransactionsLoading(false)
+    }
+  }
+
+  const loadStats = async (dateFilters) => {
+    try {
+      setStatsLoading(true)
+      const cards = await budgetService.getSummaryCards(dateFilters)
+      setSummaryCards(cards)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setStatsLoading(false)
+    }
+  }
+
+  const loadDashboardData = async () => {
+    const startDate = new Date()
+    startDate.setMonth(selectedMonth)
+    startDate.setDate(1)
+    
+    const endDate = new Date()
+    endDate.setMonth(selectedMonth + 1)
+    endDate.setDate(0)
+
+    const dateFilters = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    }
+
+    await Promise.all([
+      loadStats(dateFilters),
+      loadTransactions(dateFilters)
+    ])
+  }
 
   useEffect(() => {
     loadDashboardData()
   }, [selectedMonth])
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true)
-      const startDate = new Date()
-      startDate.setMonth(selectedMonth)
-      startDate.setDate(1)
-      
-      const endDate = new Date()
-      endDate.setMonth(selectedMonth + 1)
-      endDate.setDate(0)
-
-      const dateFilters = {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      }
-
-      const [data, cards] = await Promise.all([
-        budgetService.getDashboardData(dateFilters),
-        budgetService.getSummaryCards(dateFilters)
-      ])
-      
-      setDashboardData(data)
-      setSummaryCards(cards)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) return <div className="p-4 text-white">Loading...</div>
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
 
   const { recentTransactions } = dashboardData
@@ -174,7 +188,10 @@ function Dashboard() {
       title: t('dashboard.stats.totalBalance.title'),
       amount: formatMoney(summaryCards?.totalBalance || 0),
       icon: BanknotesIcon,
-      color: 'bg-violet-500'
+      color: 'bg-violet-500',
+      isExpandable: true,
+      isExpanded: isBalanceExpanded,
+      onToggle: () => setIsBalanceExpanded(!isBalanceExpanded)
     },
     {
       title: t('dashboard.stats.totalIncome.title'),
@@ -200,7 +217,7 @@ function Dashboard() {
     <div className="px-4 pb-20">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-semibold text-white">{t('dashboard.title')}</h1>
+          <h1 className="text-2xl font-semibold text-white">{t('dashboard.welcome')} Akin</h1>
           <button 
             onClick={loadDashboardData}
             className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
@@ -213,16 +230,48 @@ function Dashboard() {
       <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
 
       {/* Stats */}
-      <div className="space-y-4">
-        {dashboardStats.map((stat, index) => (
-          <StatItem key={index} {...stat} />
-        ))}
-      </div>
+      {statsLoading ? (
+        <div className="h-[448px] bg-[#1e2b4a] rounded-[32px]">
+          <ContentLoading />
+        </div>
+      ) : (
+        <motion.div className="space-y-4" layout>
+          <StatItem {...dashboardStats[0]} />
+          {isBalanceExpanded && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4 pl-4 border-l-2 border-violet-500/30 ml-5"
+            >
+              {dashboardStats.slice(1).map((stat, index) => (
+                <StatItem key={index} {...stat} />
+              ))}
+            </motion.div>
+          )}
+        </motion.div>
+      )}
 
       {/* Recent Transactions */}
       <div className="mt-8">
-        <h3 className="text-lg font-semibold text-white mb-4">{t('dashboard.recentTransactions')}</h3>
-        {recentTransactions.length > 0 ? (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">{t('dashboard.recentTransactions')}</h3>
+          <button 
+            onClick={() => loadTransactions({
+              startDate: new Date(new Date().setMonth(selectedMonth, 1)).toISOString(),
+              endDate: new Date(new Date().setMonth(selectedMonth + 1, 0)).toISOString()
+            })}
+            className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+          </button>
+        </div>
+        
+        {transactionsLoading ? (
+          <div className="min-h-[200px] bg-[#1e2b4a] rounded-2xl">
+            <ContentLoading />
+          </div>
+        ) : recentTransactions.length > 0 ? (
           <div className="space-y-3">
             {recentTransactions.map(transaction => (
               <RecentTransactionCard key={transaction.id} transaction={transaction} />
@@ -232,7 +281,6 @@ function Dashboard() {
           <EmptyState
             title={t('dashboard.emptyState.title')}
             description={t('dashboard.emptyState.description')}
-            onAddClick={() => navigate('/expense')}
             t={t}
           />
         )}

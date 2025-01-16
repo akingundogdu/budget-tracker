@@ -11,7 +11,7 @@ function Navigation() {
   const { t } = useLanguage()
   
   const navItems = [
-    { path: '/', icon: HomeIcon, label: t('navigation.dashboard') },
+    { path: '/dashboard', icon: HomeIcon, label: t('navigation.dashboard') },
     { path: '/expense', icon: CurrencyDollarIcon, label: t('navigation.expenses') },
     { path: '/profile', icon: UserCircleIcon, label: t('navigation.profile') }
   ]

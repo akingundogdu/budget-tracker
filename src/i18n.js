@@ -19,6 +19,7 @@ const resources = {
         refresh: 'Refresh',
         setDate: 'Set Date',
         setReminder: 'Set Reminder',
+        loading: 'Loading...'
       },
       navigation: {
         dashboard: 'Dashboard',
@@ -27,6 +28,7 @@ const resources = {
       },
       dashboard: {
         title: 'Dashboard',
+        welcome: 'Welcome',
         stats: {
           totalBalance: {
             title: 'Total Balance',
@@ -211,6 +213,7 @@ const resources = {
         refresh: 'Yenile',
         setDate: 'Tarih Seç',
         setReminder: 'Hatırlatıcı Ekle',
+        loading: 'Yükleniyor...'
       },
       navigation: {
         dashboard: 'Ana Sayfa',
@@ -219,6 +222,7 @@ const resources = {
       },
       dashboard: {
         title: 'Ana Sayfa',
+        welcome: 'Hoşgeldin',
         stats: {
           totalBalance: {
             title: 'Toplam Bakiye',

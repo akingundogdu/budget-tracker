@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect } from 'react'
@@ -16,7 +16,8 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/expense" element={<Expense />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/language" element={<LanguageSettings />} />
