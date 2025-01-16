@@ -32,18 +32,10 @@ class BudgetService {
   // Dashboard data
   async getDashboardData(filters = {}) {
     try {
-      const [transactions, stats, upcomingReminders, categories] = await Promise.all([
-        this.transactions.getAll({ ...filters, limit: 5 }),
-        this.transactions.getStats(filters),
-        this.reminders.getUpcoming(7),
-        this.categories.getWithTransactionCounts()
-      ]);
+      const transactions = await this.transactions.getAll({ ...filters, limit: 10 });
 
       return {
-        recentTransactions: transactions,
-        stats,
-        upcomingReminders,
-        categories
+        recentTransactions: transactions
       };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -118,6 +110,23 @@ class BudgetService {
       };
     } catch (error) {
       console.error('Error fetching category analytics:', error);
+      throw error;
+    }
+  }
+
+  // Dashboard summary cards
+  async getSummaryCards(filters = {}) {
+    try {
+      const stats = await this.transactions.getStats(filters);
+
+      return {
+        totalBalance: stats.totalIncome - stats.totalExpenses,
+        totalIncome: stats.totalIncome,
+        totalExpenses: stats.totalExpenses,
+        regularExpenses: stats.regularExpenses
+      };
+    } catch (error) {
+      console.error('Error fetching summary cards:', error);
       throw error;
     }
   }

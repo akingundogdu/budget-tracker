@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import { ArrowLeftIcon, CalendarIcon, BellIcon } from '@heroicons/react/24/outline'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { budgetService } from '../services'
 import CategorySelect from '../components/CategorySelect'
 import DatePicker from '../components/DatePicker'
 import ReminderSelect from '../components/ReminderSelect'
@@ -25,6 +25,15 @@ function AddTransactionPage() {
     pushEnabled: true,
     emailEnabled: false
   })
+  const [isRegular, setIsRegular] = useState(false)
+  const [regularPeriod, setRegularPeriod] = useState('monthly')
+
+  const periods = useMemo(() => [
+    { id: 'weekly', label: t('expenses.form.regularPeriod.weekly') },
+    { id: 'monthly', label: t('expenses.form.regularPeriod.monthly') },
+    { id: 'quarterly', label: t('expenses.form.regularPeriod.quarterly') },
+    { id: 'yearly', label: t('expenses.form.regularPeriod.yearly') }
+  ], [t])
 
   const handleAmountChange = (e) => {
     const value = e.target.value.replace(/[^0-9.]/g, '')
@@ -82,6 +91,30 @@ function AddTransactionPage() {
 
     return `${timeText} ${methodText}`;
   }
+
+  const handleSave = async () => {
+    try {
+      if (!amount || !selectedCategory || !selectedDate) {
+        // Show error
+        return;
+      }
+
+      const transaction = {
+        amount: parseFloat(amount),
+        category_id: selectedCategory.id,
+        type,
+        date: selectedDate.toISOString(),
+        is_regular: isRegular,
+        regular_period: isRegular ? regularPeriod : null
+      };
+
+      await budgetService.transactions.create(transaction);
+      navigate(-1);
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      // Show error
+    }
+  };
 
   return (
     <>
@@ -165,9 +198,60 @@ function AddTransactionPage() {
             <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
           </button>
 
+          {/* Regular Transaction Toggle and Period Selection */}
+          <div className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-white font-medium">
+                  {type === 'income' ? t('expenses.form.regularIncome') : t('expenses.form.regularExpense')}
+                </h3>
+                <p className="text-white/60 text-sm">
+                  {type === 'income' ? t('expenses.form.regularIncomeHint') : t('expenses.form.regularExpenseHint')}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsRegular(!isRegular)}
+                className={`w-12 h-6 rounded-full transition-colors ${
+                  isRegular ? 'bg-primary' : 'bg-gray-600'
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-full bg-white transform transition-transform ${
+                    isRegular ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Period Selection - Only show when regular is enabled */}
+            {isRegular && (
+              <div className="mt-4">
+                <label className="block text-white/60 mb-2">
+                  {t('expenses.form.regularPeriod.title')}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {periods.map((period) => (
+                    <button
+                      key={period.id}
+                      onClick={() => setRegularPeriod(period.id)}
+                      className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                        regularPeriod === period.id
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-600/20 text-white/60 hover:bg-gray-600/40'
+                      }`}
+                    >
+                      {period.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Save Button */}
           <motion.button
             whileTap={{ scale: 0.98 }}
+            onClick={handleSave}
             className="w-full bg-primary text-white py-4 rounded-xl font-medium"
           >
             {t('common.save')}

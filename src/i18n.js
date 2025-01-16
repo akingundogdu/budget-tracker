@@ -123,6 +123,17 @@ const resources = {
           category: 'Category',
           description: 'Description',
           date: 'Date',
+          regularExpense: 'Regular Expense',
+          regularExpenseHint: 'Mark this as a recurring expense',
+          regularIncome: 'Regular Income',
+          regularIncomeHint: 'Mark this as a recurring income',
+          regularPeriod: {
+            title: 'Recurrence Period',
+            weekly: 'Weekly',
+            monthly: 'Monthly',
+            quarterly: 'Quarterly',
+            yearly: 'Yearly'
+          }
         },
         filter: {
           sortBy: 'Sort by',
@@ -304,6 +315,17 @@ const resources = {
           category: 'Kategori',
           description: 'Açıklama',
           date: 'Tarih',
+          regularExpense: 'Düzenli Gider',
+          regularExpenseHint: 'Bu gideri düzenli gider olarak işaretle',
+          regularIncome: 'Düzenli Gelir',
+          regularIncomeHint: 'Bu geliri düzenli gelir olarak işaretle',
+          regularPeriod: {
+            title: 'Tekrar Periyodu',
+            weekly: 'Haftalık',
+            monthly: 'Aylık',
+            quarterly: '3 Aylık',
+            yearly: 'Yıllık'
+          }
         },
         filter: {
           sortBy: 'Sıralama',

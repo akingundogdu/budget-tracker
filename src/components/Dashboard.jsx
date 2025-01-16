@@ -126,11 +126,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dashboardData, setDashboardData] = useState({
-    recentTransactions: [],
-    stats: null,
-    upcomingReminders: [],
-    categories: []
+    recentTransactions: []
   })
+  const [summaryCards, setSummaryCards] = useState(null)
 
   useEffect(() => {
     loadDashboardData()
@@ -147,12 +145,18 @@ function Dashboard() {
       endDate.setMonth(selectedMonth + 1)
       endDate.setDate(0)
 
-      const data = await budgetService.getDashboardData({
+      const dateFilters = {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
-      })
+      }
+
+      const [data, cards] = await Promise.all([
+        budgetService.getDashboardData(dateFilters),
+        budgetService.getSummaryCards(dateFilters)
+      ])
       
       setDashboardData(data)
+      setSummaryCards(cards)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -163,30 +167,30 @@ function Dashboard() {
   if (loading) return <div className="p-4 text-white">Loading...</div>
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>
 
-  const { recentTransactions, stats } = dashboardData
+  const { recentTransactions } = dashboardData
 
   const dashboardStats = [
     {
       title: t('dashboard.stats.totalBalance.title'),
-      amount: formatMoney(stats?.totalIncome - stats?.totalExpenses || 0),
+      amount: formatMoney(summaryCards?.totalBalance || 0),
       icon: BanknotesIcon,
       color: 'bg-violet-500'
     },
     {
       title: t('dashboard.stats.totalIncome.title'),
-      amount: formatMoney(stats?.totalIncome || 0),
+      amount: formatMoney(summaryCards?.totalIncome || 0),
       icon: ArrowTrendingUpIcon,
       color: 'bg-green-500'
     },
     {
       title: t('dashboard.stats.totalExpenses.title'),
-      amount: formatMoney(stats?.totalExpenses || 0),
+      amount: formatMoney(summaryCards?.totalExpenses || 0),
       icon: ArrowTrendingDownIcon,
       color: 'bg-red-500'
     },
     {
       title: t('dashboard.stats.regularExpenses.title'),
-      amount: formatMoney((stats?.totalExpenses || 0) * 0.4),
+      amount: formatMoney(summaryCards?.regularExpenses || 0),
       icon: CalendarDaysIcon,
       color: 'bg-amber-500'
     }

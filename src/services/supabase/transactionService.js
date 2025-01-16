@@ -73,6 +73,7 @@ class TransactionService {
       .from('transactions')
       .insert([{
         ...transaction,
+        is_regular: transaction.is_regular || false,
         user_id: (await supabase.auth.getUser()).data.user.id
       }])
       .select();
@@ -110,6 +111,8 @@ class TransactionService {
         type,
         amount,
         category_id,
+        is_regular,
+        regular_period,
         categories (
           name,
           color
@@ -129,9 +132,24 @@ class TransactionService {
     const { data, error } = await query;
     if (error) throw error;
 
+    const expenses = data.filter(t => t.type === 'expense');
+    const regularExpenses = expenses.filter(t => t.is_regular);
+
+    // Group regular expenses by period
+    const regularExpensesByPeriod = regularExpenses.reduce((acc, t) => {
+      const period = t.regular_period || 'monthly'; // Default to monthly for backward compatibility
+      if (!acc[period]) {
+        acc[period] = 0;
+      }
+      acc[period] += t.amount;
+      return acc;
+    }, {});
+
     return {
       totalIncome: data.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-      totalExpenses: data.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
+      totalExpenses: expenses.reduce((sum, t) => sum + t.amount, 0),
+      regularExpenses: regularExpenses.reduce((sum, t) => sum + t.amount, 0),
+      regularExpensesByPeriod,
       byCategory: Object.values(data.reduce((acc, t) => {
         const key = t.category_id;
         if (!acc[key]) {
