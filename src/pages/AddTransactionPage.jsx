@@ -1,12 +1,18 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
-import { ArrowLeftIcon, CalendarIcon, BellIcon } from '@heroicons/react/24/outline'
+import { 
+  ArrowLeftIcon, 
+  CalendarIcon, 
+  BellIcon,
+  CreditCardIcon
+} from '@heroicons/react/24/outline'
 import { useNavigate, useParams } from 'react-router-dom'
 import { budgetService } from '../services'
 import CategorySelect from '../components/CategorySelect'
 import DatePicker from '../components/DatePicker'
 import ReminderSelect from '../components/ReminderSelect'
+import PaymentMethodSelect from '../components/PaymentMethodSelect'
 import i18n from '../i18n'
 import { useTranslation } from 'react-i18next'
 
@@ -31,6 +37,8 @@ function AddTransactionPage() {
   const [isRegular, setIsRegular] = useState(false)
   const [regularPeriod, setRegularPeriod] = useState('monthly')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPaymentMethodSelect, setShowPaymentMethodSelect] = useState(false)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
 
   const periods = useMemo(() => [
     { id: 'weekly', label: t('expenses.form.regularPeriod.weekly') },
@@ -125,6 +133,11 @@ function AddTransactionPage() {
     return amount && amount !== '0' && selectedCategory && selectedDate;
   }, [amount, selectedCategory, selectedDate]);
 
+  const handlePaymentMethodSelect = (method) => {
+    setSelectedPaymentMethod(method)
+    setShowPaymentMethodSelect(false)
+  }
+
   const handleSave = async () => {
     try {
       if (!isFormValid) {
@@ -141,7 +154,8 @@ function AddTransactionPage() {
         date: selectedDate.toISOString(),
         is_regular: isRegular,
         regular_period: isRegular ? regularPeriod : null,
-        description: selectedCategory.id === 'other' ? description : null
+        description: selectedCategory.id === 'other' ? description : null,
+        payment_method: selectedPaymentMethod?.id || 'cash' // Default to cash if not selected
       };
 
       const savedTransaction = await budgetService.transactions.create(transaction);
@@ -270,6 +284,20 @@ function AddTransactionPage() {
             <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
           </button>
 
+          {/* Payment Method Selection */}
+          <button
+            onClick={() => setShowPaymentMethodSelect(true)}
+            className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4 flex items-center"
+          >
+            <div className="w-8 h-8 bg-gray-600/20 rounded-lg flex items-center justify-center mr-3">
+              {selectedPaymentMethod?.icon || <CreditCardIcon className="w-5 h-5 text-gray-400" />}
+            </div>
+            <span className="text-white/60">
+              {selectedPaymentMethod ? t(`expenses.paymentMethods.${selectedPaymentMethod.id}`) : t('expenses.paymentMethods.select')}
+            </span>
+            <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
+          </button>
+
           {/* Regular Transaction Toggle and Period Selection */}
           <div className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4">
             <div className="flex items-center justify-between mb-4">
@@ -354,6 +382,14 @@ function AddTransactionPage() {
             onClose={() => setShowReminderSelect(false)}
             settings={reminderSettings}
             onSave={handleReminderSave}
+          />
+        )}
+        {showPaymentMethodSelect && (
+          <PaymentMethodSelect
+            isOpen={showPaymentMethodSelect}
+            onClose={() => setShowPaymentMethodSelect(false)}
+            onSelect={handlePaymentMethodSelect}
+            selectedMethod={selectedPaymentMethod}
           />
         )}
       </AnimatePresence>

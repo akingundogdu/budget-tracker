@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
-import { ArrowLeftIcon, BellIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, BellIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 
 function ReminderSelect({ isOpen, onClose, settings, onSave }) {
   const { t } = useLanguage()
@@ -55,14 +55,13 @@ function ReminderSelect({ isOpen, onClose, settings, onSave }) {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-white">{t('reminders.title')}</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg bg-[#243351] text-white hover:bg-[#2d3c5d]"
+              className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
             >
-              <ArrowLeftIcon className="w-6 h-6" />
+              <XMarkIcon className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-semibold text-white">{t('reminders.title')}</h2>
-            <div className="w-10" /> {/* Spacer for alignment */}
           </div>
 
           {/* Enable/Disable Switch */}

@@ -65,7 +65,7 @@ function ExpenseItem({ expense, onDelete }) {
           backgroundColor: isPressed ? '#243351' : '#1e2b4a'
         }}
         transition={{ duration: 0.2 }}
-        className="flex items-center justify-between p-4 rounded-lg group cursor-pointer"
+        className="flex items-center justify-between p-4 rounded-lg group cursor-pointer select-none"
       >
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-full bg-violet-500/10">
@@ -92,6 +92,11 @@ function ExpenseItem({ expense, onDelete }) {
               </div>
             )}
             <p className="font-medium text-white">{formatMoney(expense.amount)}</p>
+            {expense.payment_method && (
+              <p className="text-sm text-white/40">
+                {t(`expenses.paymentMethods.${expense.payment_method}`)}
+              </p>
+            )}
           </div>
         </div>
       </motion.div>

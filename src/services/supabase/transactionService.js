@@ -64,11 +64,20 @@ class TransactionService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Ensure payment_method is one of the allowed values
+    const allowedPaymentMethods = ['credit_card', 'bank', 'cash'];
+    const paymentMethod = transaction.payment_method || 'cash';
+    
+    if (!allowedPaymentMethods.includes(paymentMethod)) {
+      throw new Error('Invalid payment method');
+    }
+
     const { data, error } = await supabase
       .from('transactions')
       .insert([{
         ...transaction,
         is_regular: transaction.is_regular || false,
+        payment_method: paymentMethod,
         user_id: user.id
       }])
       .select();
@@ -80,6 +89,14 @@ class TransactionService {
   async update(id, transaction) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
+
+    // Ensure payment_method is one of the allowed values if it's being updated
+    if (transaction.payment_method) {
+      const allowedPaymentMethods = ['credit_card', 'bank', 'cash'];
+      if (!allowedPaymentMethods.includes(transaction.payment_method)) {
+        throw new Error('Invalid payment method');
+      }
+    }
 
     const { data, error } = await supabase
       .from('transactions')

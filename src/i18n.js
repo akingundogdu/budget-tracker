@@ -144,6 +144,16 @@ const resources = {
           addNewIncome: 'Add New Income',
           addNewExpense: 'Add New Expense'
         },
+        paymentMethods: {
+          title: 'Payment Method',
+          select: 'Select Payment Method',
+          creditCard: 'Credit Card',
+          creditCardDesc: 'Pay with credit or debit card',
+          bank: 'Bank Transfer',
+          bankDesc: 'Direct bank transfer or EFT',
+          cash: 'Cash',
+          cashDesc: 'Physical cash payment'
+        },
         noTransactions: 'No transactions found',
         budgetSpent: 'of the budget spent',
         monthlyIncome: 'Monthly Income',
@@ -468,6 +478,16 @@ const resources = {
           expense: 'Gider',
           addNewIncome: 'Yeni Gelir Ekle',
           addNewExpense: 'Yeni Gider Ekle'
+        },
+        paymentMethods: {
+          title: 'Ödeme Yöntem',
+          select: 'Ödeme Yöntemi Seç',
+          creditCard: 'Kredi Kartı',
+          creditCardDesc: 'Kredi veya debi kartı ile ödeme',
+          bank: 'Banka Havalesi',
+          bankDesc: 'Doğrudan banka havalesi veya EFT',
+          cash: 'Nakit',
+          cashDesc: 'Fiziksel nakit ödeme'
         },
         noTransactions: 'İşlem bulunamadı',
         budgetSpent: 'bütçeden harcandı',

@@ -53,6 +53,7 @@ function Expense() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.2 }}
+      className="select-none"
     >      
       <div className="min-h-screen bg-[#0f172a] pt-6">
         {/* Header */}
