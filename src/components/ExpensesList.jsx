@@ -9,12 +9,26 @@ import { budgetService } from '../services'
 import EmptyState from './EmptyState'
 import { notify } from './Notifier'
 import ConfirmDialog from './ConfirmDialog'
+import { useLongPress } from '@uidotdev/usehooks'
 
 function ExpenseItem({ expense, onDelete }) {
   const { formatMoney } = useLanguage()
   const { t } = useTranslation()
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [isPressed, setIsPressed] = useState(false)
+
+  const longPressProps = useLongPress(
+    () => {
+      setIsPressed(true)
+    },
+    {
+      onCancel: () => {
+        setIsPressed(false)
+      },
+      threshold: 400,
+    }
+  )
 
   // Find the category from our constants
   const allCategories = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES]
@@ -45,9 +59,16 @@ function ExpenseItem({ expense, onDelete }) {
   return (
     <>
       <motion.div
+        {...longPressProps}
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between p-4 rounded-lg bg-[#1e2b4a] group"
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          scale: isPressed ? 0.98 : 1,
+          backgroundColor: isPressed ? '#243351' : '#1e2b4a'
+        }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center justify-between p-4 rounded-lg group cursor-pointer"
       >
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-full bg-violet-500/10">
@@ -75,10 +96,17 @@ function ExpenseItem({ expense, onDelete }) {
             )}
             <p className="font-medium text-white">{formatMoney(expense.amount)}</p>
           </div>
-          <button
+          <motion.button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ 
+              opacity: isPressed ? 1 : 0,
+              x: isPressed ? 0 : 20,
+              scale: isPressed ? 1 : 0.8
+            }}
+            transition={{ duration: 0.2 }}
+            className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 disabled:opacity-50"
             title={t('expenses.delete')}
           >
             {isDeleting ? (
@@ -86,7 +114,7 @@ function ExpenseItem({ expense, onDelete }) {
             ) : (
               <TrashIcon className="w-5 h-5" />
             )}
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
