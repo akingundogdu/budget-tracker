@@ -2,11 +2,16 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.jsx'
 import { HomeIcon, BanknotesIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+import { useEffect } from 'react'
 
 export default function Navigation() {
   const { t } = useTranslation()
   const location = useLocation()
   const { user } = useAuth()
+
+  useEffect(() => {
+    console.log('Navigation: Route changed to:', location.pathname)
+  }, [location])
 
   // Don't render navigation if user is not authenticated or on auth pages
   if (!user || location.pathname === '/login' || location.pathname === '/register') {

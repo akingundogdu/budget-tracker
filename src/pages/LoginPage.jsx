@@ -45,21 +45,21 @@ export default function LoginPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8"
+      className="fixed inset-0 flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8"
     >
       {/* Top Illustration */}
-      <div className="w-full max-w-md lg:max-w-lg mt-8 lg:mt-12">
+      <div className="flex-shrink-0 w-full max-w-md lg:max-w-lg mt-8">
         <LoginSvg className="w-full h-auto" />
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-md space-y-8 mt-8">
-        <div>
+      <div className="w-full max-w-md flex-1 flex flex-col justify-center">
+        <div className="mb-6">
           <h2 className="text-center text-3xl font-extrabold text-white">
             {t('common.auth.login.title')}
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-500/10 p-4">
               <div className="text-sm text-red-500">{error}</div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
-                className="appearance-none rounded-t-lg relative block w-full px-4 py-3 bg-[#1e2b4a] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
+                className="appearance-none rounded-t-lg relative block w-full px-4 py-2.5 bg-[#1e2b4a] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
                 placeholder={t('common.auth.login.email')}
                 value={formData.email}
                 onChange={handleChange}
@@ -90,7 +90,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-b-lg relative block w-full px-4 py-3 bg-[#1e2b4a] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
+                className="appearance-none rounded-b-lg relative block w-full px-4 py-2.5 bg-[#1e2b4a] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
                 placeholder={t('common.auth.login.password')}
                 value={formData.password}
                 onChange={handleChange}
@@ -98,17 +98,15 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-base font-medium rounded-lg text-white bg-violet-500 hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-colors"
-            >
-              {loading ? t('common.loading') : t('common.auth.login.submit')}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent text-base font-medium rounded-lg text-white bg-violet-500 hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-colors"
+          >
+            {loading ? t('common.loading') : t('common.auth.login.submit')}
+          </button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-2">
             <div className="text-sm">
               <Link
                 to="/forgot-password"

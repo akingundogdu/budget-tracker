@@ -51,9 +51,7 @@ function AnimatedRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <AnimatePresence mode="wait" initial={false}>
-              <Dashboard key="dashboard" />
-            </AnimatePresence>
+            <Dashboard key="dashboard" />
           </ProtectedRoute>
         }
       />
@@ -61,9 +59,7 @@ function AnimatedRoutes() {
         path="/expense"
         element={
           <ProtectedRoute>
-            <AnimatePresence mode="wait" initial={false}>
-              <Expense key="expense" />
-            </AnimatePresence>
+            <Expense key="expense" />
           </ProtectedRoute>
         }
       />
@@ -71,9 +67,7 @@ function AnimatedRoutes() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <AnimatePresence mode="wait" initial={false}>
-              <Profile key="profile" />
-            </AnimatePresence>
+            <Profile key="profile" />
           </ProtectedRoute>
         }
       />
@@ -81,9 +75,7 @@ function AnimatedRoutes() {
         path="/language"
         element={
           <ProtectedRoute>
-            <AnimatePresence mode="wait" initial={false}>
-              <LanguageSettings key="language" />
-            </AnimatePresence>
+            <LanguageSettings key="language" />
           </ProtectedRoute>
         }
       />
