@@ -20,12 +20,13 @@ function ExpenseItem({ expense, onDelete }) {
 
   const longPressProps = useLongPress(
     () => {
-      setIsPressed(true)
+      setShowConfirmDialog(true)
+      setIsPressed(false)
     },
     {
-      onCancel: () => {
-        setIsPressed(false)
-      },
+      onStart: () => setIsPressed(true),
+      onCancel: () => setIsPressed(false),
+      onFinish: () => setIsPressed(false),
       threshold: 400,
     }
   )
@@ -33,10 +34,6 @@ function ExpenseItem({ expense, onDelete }) {
   // Find the category from our constants
   const allCategories = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES]
   const categoryIcon = allCategories.find(cat => cat.id === expense.category)?.icon || '💰'
-
-  const handleDelete = async () => {
-    setShowConfirmDialog(true)
-  }
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true)
@@ -96,25 +93,6 @@ function ExpenseItem({ expense, onDelete }) {
             )}
             <p className="font-medium text-white">{formatMoney(expense.amount)}</p>
           </div>
-          <motion.button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ 
-              opacity: isPressed ? 1 : 0,
-              x: isPressed ? 0 : 20,
-              scale: isPressed ? 1 : 0.8
-            }}
-            transition={{ duration: 0.2 }}
-            className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 disabled:opacity-50"
-            title={t('expenses.delete')}
-          >
-            {isDeleting ? (
-              <Loading size="small" />
-            ) : (
-              <TrashIcon className="w-5 h-5" />
-            )}
-          </motion.button>
         </div>
       </motion.div>
 
