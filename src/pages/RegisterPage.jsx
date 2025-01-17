@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import i18n from '../i18n';
 import { notify } from '../components/Notifier';
 import { supabase } from '../config/supabase';
+import { detectUserLanguage } from '../utils/languageDetector';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -20,7 +21,7 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    preferred_language: language // Default to current language
+    preferred_language: detectUserLanguage() // Use detected language as default
   });
 
   const languages = [
@@ -101,6 +102,17 @@ export default function RegisterPage() {
   const selectedLanguage = languages.find(lang => lang.code === formData.preferred_language);
 
   useEffect(() => {
+    // Set the detected language on component mount
+    const detectedLanguage = detectUserLanguage();
+    setFormData(prev => ({
+      ...prev,
+      preferred_language: detectedLanguage
+    }));
+    
+    // Update i18n and localStorage
+    i18n.changeLanguage(detectedLanguage);
+    localStorage.setItem('preferredLanguage', detectedLanguage);
+    
     // Disable scrolling on mount
     document.body.style.overflow = 'hidden';
     
