@@ -3,10 +3,13 @@ import { motion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
+import profileService from '../services/supabase/profileService'
+import { notify } from './Notifier'
 
 function LanguageSettings() {
   const { language, setLanguage, t } = useLanguage()
   const [selectedLanguage, setSelectedLanguage] = useState(language)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const languages = [
@@ -23,11 +26,25 @@ function LanguageSettings() {
     setSelectedLanguage(langCode)
   }
 
-  const handleSave = () => {
-    setLanguage(selectedLanguage)
-    // Save to localStorage to persist the language preference
-    localStorage.setItem('preferredLanguage', selectedLanguage)
-    navigate(-1)
+  const handleSave = async () => {
+    try {
+      setLoading(true)
+      // Save to localStorage to persist the language preference
+      localStorage.setItem('preferredLanguage', selectedLanguage)
+      
+      // Save to database
+      await profileService.updatePreferredLanguage(selectedLanguage)
+      
+      // Update context
+      setLanguage(selectedLanguage)
+      
+      navigate(-1)
+    } catch (error) {
+      console.error('Error saving language preference:', error)
+      notify.error(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -40,7 +57,7 @@ function LanguageSettings() {
         >
           <ArrowLeftIcon className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-semibold text-white">{t('settings.language')}</h1>
+        <h1 className="text-2xl font-semibold text-white">{t('profile.menu.language.title')}</h1>
       </div>
 
       {/* Language Options */}
@@ -74,9 +91,9 @@ function LanguageSettings() {
             : 'bg-[#1e293b] text-white/60'
         }`}
         whileTap={{ scale: 0.98 }}
-        disabled={selectedLanguage === language}
+        disabled={selectedLanguage === language || loading}
       >
-        {t('common.save')}
+        {loading ? t('common.saving') : t('common.save')}
       </motion.button>
     </div>
   )

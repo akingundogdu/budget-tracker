@@ -14,9 +14,13 @@ class TransactionService {
       limit = 10
     } = filters;
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     let query = supabase
       .from('transactions')
       .select('*')
+      .eq('user_id', user.id)
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range((page - 1) * limit, page * limit - 1);
 
@@ -42,10 +46,14 @@ class TransactionService {
   }
 
   async getById(id) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) throw error;
@@ -53,12 +61,15 @@ class TransactionService {
   }
 
   async create(transaction) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('transactions')
       .insert([{
         ...transaction,
         is_regular: transaction.is_regular || false,
-        user_id: (await supabase.auth.getUser()).data.user.id
+        user_id: user.id
       }])
       .select();
 
@@ -67,10 +78,14 @@ class TransactionService {
   }
 
   async update(id, transaction) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('transactions')
       .update(transaction)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select();
 
     if (error) throw error;
@@ -78,20 +93,28 @@ class TransactionService {
   }
 
   async delete(id) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { error } = await supabase
       .from('transactions')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) throw error;
   }
 
   async getStats(filters = {}) {
     const { startDate, endDate, category } = filters;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
 
     let query = supabase
       .from('transactions')
-      .select('*');
+      .select('*')
+      .eq('user_id', user.id);
 
     if (startDate) {
       query = query.gte('date', startDate);

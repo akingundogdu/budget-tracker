@@ -35,7 +35,7 @@ function Expense() {
     }
   }
 
-  const spentPercentage = (stats.totalAmount / stats.totalBudget) * 100
+  const spentPercentage = stats.totalBudget === 0 ? 0 : (stats.totalAmount / stats.totalBudget) * 100
 
   const handleAddTransaction = () => {
     navigate(`/add-transaction/${activeTab}`)

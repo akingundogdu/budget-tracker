@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
@@ -11,6 +11,16 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    // Disable scrolling on mount
+    document.body.style.overflow = 'hidden';
+    
+    // Re-enable scrolling on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,15 +46,15 @@ export default function ForgotPasswordPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8"
+      className="fixed inset-0 flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
       {/* Top Illustration */}
-      <div className="w-full max-w-md lg:max-w-lg mt-8 lg:mt-12">
+      <div className="w-full max-w-md lg:max-w-lg mt-4 lg:mt-8">
         <LoginSvg className="w-full h-auto" />
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-md space-y-8 mt-8">
+      <div className="w-full max-w-md space-y-6 mt-4">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-white">
             {t('common.auth.forgotPassword.title')}
@@ -53,7 +63,7 @@ export default function ForgotPasswordPage() {
             {t('common.auth.forgotPassword.description')}
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 px-6" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-500/10 p-4">
               <div className="text-sm text-red-500">{error}</div>

@@ -14,11 +14,13 @@ import {
   EnvelopeIcon,
   KeyIcon,
   UserIcon,
-  AtSymbolIcon
+  AtSymbolIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { notify } from './Notifier'
+import { feedbackService } from '../services/supabase/feedbackService'
 
 const MenuItem = ({ icon: Icon, title, subtitle, onClick, showBadge, disabled, comingSoon, t, isLogout, isWarning }) => (
   <motion.button
@@ -86,15 +88,26 @@ const UpdateForm = ({ onSubmit, fields, loading, error, buttonText }) => (
         <label htmlFor={field.id} className="block text-sm font-medium text-white mb-1">
           {field.label}
         </label>
-        <input
-          id={field.id}
-          type={field.type}
-          value={field.value}
-          onChange={field.onChange}
-          required={field.required}
-          className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-[#243351] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
-          placeholder={field.placeholder}
-        />
+        {field.type === 'textarea' ? (
+          <textarea
+            id={field.id}
+            value={field.value}
+            onChange={field.onChange}
+            required={field.required}
+            className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-[#243351] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base min-h-[150px] resize-y"
+            placeholder={field.placeholder}
+          />
+        ) : (
+          <input
+            id={field.id}
+            type={field.type}
+            value={field.value}
+            onChange={field.onChange}
+            required={field.required}
+            className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-[#243351] border border-[#2d3c5d] placeholder-gray-400 text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500 focus:z-10 text-base"
+            placeholder={field.placeholder}
+          />
+        )}
       </div>
     ))}
     <button
@@ -122,6 +135,7 @@ function Profile() {
   const [showNameModal, setShowNameModal] = useState(false)
   const [showUsernameModal, setShowUsernameModal] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -132,6 +146,11 @@ function Profile() {
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
+  })
+  const [feedbackData, setFeedbackData] = useState({
+    fullName: user.full_name || '',
+    email: user.email || '',
+    message: ''
   })
 
   const handleUpdateName = async (e) => {
@@ -211,6 +230,28 @@ function Profile() {
     }
   }
 
+  const handleSubmitFeedback = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      await feedbackService.submitFeedback(feedbackData)
+      setShowFeedbackModal(false)
+      setFeedbackData({
+        fullName: user.full_name || '',
+        email: user.email || '',
+        message: ''
+      })
+      notify.success(t('profile.notifications.feedbackSubmitted'))
+    } catch (error) {
+      setError(error.message)
+      notify.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleLogout = async () => {
     await signOut()
     navigate('/login')
@@ -241,6 +282,12 @@ function Profile() {
       title: t('profile.menu.language.title'),
       subtitle: language === 'en' ? 'English' : 'Türkçe',
       onClick: () => navigate('/language')
+    },
+    {
+      icon: ChatBubbleLeftRightIcon,
+      title: t('profile.menu.feedback.title'),
+      subtitle: t('profile.menu.feedback.subtitle'),
+      onClick: () => setShowFeedbackModal(true)
     },
     // Coming Soon items
     {
@@ -414,6 +461,49 @@ function Profile() {
           loading={loading}
           error={error}
           buttonText={t('common.save')}
+        />
+      </UpdateModal>
+
+      {/* Feedback Modal */}
+      <UpdateModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        title={t('profile.menu.feedback.title')}
+      >
+        <UpdateForm
+          onSubmit={handleSubmitFeedback}
+          fields={[
+            {
+              id: 'fullName',
+              label: t('profile.menu.feedback.fullName'),
+              type: 'text',
+              value: feedbackData.fullName,
+              onChange: (e) => setFeedbackData(prev => ({ ...prev, fullName: e.target.value })),
+              required: true,
+              placeholder: t('profile.menu.feedback.fullNamePlaceholder')
+            },
+            {
+              id: 'email',
+              label: t('profile.menu.feedback.email'),
+              type: 'email',
+              value: feedbackData.email,
+              onChange: (e) => setFeedbackData(prev => ({ ...prev, email: e.target.value })),
+              required: true,
+              placeholder: t('profile.menu.feedback.emailPlaceholder')
+            },
+            {
+              id: 'message',
+              label: t('profile.menu.feedback.message'),
+              type: 'textarea',
+              value: feedbackData.message,
+              onChange: (e) => setFeedbackData(prev => ({ ...prev, message: e.target.value })),
+              required: true,
+              placeholder: t('profile.menu.feedback.messagePlaceholder')
+            }
+          ]}
+          loading={loading}
+          error={error}
+          buttonText={t('profile.menu.feedback.submit')}
         />
       </UpdateModal>
     </motion.div>

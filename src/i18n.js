@@ -38,7 +38,8 @@ const resources = {
             confirmPassword: 'Confirm Password',
             submit: 'Register',
             hasAccount: 'Already have an account?',
-            signIn: 'Sign in'
+            signIn: 'Sign in',
+            verificationEmailSent: 'Please check your email to verify your account'
           },
           forgotPassword: {
             title: 'Reset your password',
@@ -54,7 +55,8 @@ const resources = {
             passwordMinLength: 'Password must be at least 6 characters',
             passwordMatch: 'Passwords must match'
           }
-        }
+        },
+        confirm: 'Confirm'
       },
       navigation: {
         dashboard: 'Dashboard',
@@ -118,6 +120,10 @@ const resources = {
         noTransactions: 'No transactions found',
         budgetSpent: 'of the budget spent',
         loadMore: 'Load More',
+        emptyState: {
+          title: 'No transactions yet',
+          description: 'Start tracking your finances by adding your first transaction'
+        },
         categories: {
           // Category Groups
           regular: 'Regular Income',
@@ -196,7 +202,12 @@ const resources = {
             month: 'This month',
             year: 'This year'
           }
-        }
+        },
+        deleteTitle: 'Delete Transaction',
+        deleteButton: 'Delete',
+        deleteConfirmation: 'Are you sure you want to delete {{type}} transaction of {{amount}}?',
+        deleteSuccess: 'Transaction deleted successfully',
+        deleteError: 'Failed to delete transaction'
       },
       profile: {
         title: 'Profile',
@@ -245,12 +256,24 @@ const resources = {
             subtitle: 'App preferences and more'
           },
           logout: 'Logout',
-          logoutSubtitle: 'Sign out from your account'
+          logoutSubtitle: 'Sign out from your account',
+          feedback: {
+            title: 'Send Feedback',
+            subtitle: 'Help us improve your experience',
+            fullName: 'Full Name',
+            fullNamePlaceholder: 'Enter your full name',
+            email: 'Email',
+            emailPlaceholder: 'Enter your email',
+            message: 'Your Feedback',
+            messagePlaceholder: 'Tell us what you think about the app...',
+            submit: 'Submit Feedback'
+          }
         },
         notifications: {
           nameUpdated: 'Your name has been updated successfully',
           usernameUpdated: 'Your username has been updated successfully',
-          passwordUpdated: 'Your password has been updated successfully'
+          passwordUpdated: 'Your password has been updated successfully',
+          feedbackSubmitted: 'Thank you for your feedback!'
         }
       },
       reminders: {
@@ -289,26 +312,27 @@ const resources = {
         comingSoon: 'Çok Yakında',
         refresh: 'Yenile',
         setDate: 'Tarih Seç',
-        setReminder: 'Hatırlatıcı Ekle',
+        setReminder: 'Hatırlatıcı Ayarla',
         loading: 'Yükleniyor...',
         auth: {
           login: {
-            title: 'Giriş Yap',
+            title: 'Giriş',
             email: 'E-posta',
             password: 'Şifre',
             submit: 'Giriş Yap',
-            forgotPassword: 'Şifremi Unuttum',
-            noAccount: 'Hesabın yok mu?',
+            forgotPassword: 'Şifremi Unuttum?',
+            noAccount: 'Hesabınız yok mu?',
             signUp: 'Kayıt ol'
           },
           register: {
-            title: 'Kayıt Ol',
+            title: 'Kayıt',
             email: 'E-posta',
             password: 'Şifre',
             confirmPassword: 'Şifre Tekrar',
             submit: 'Kayıt Ol',
-            hasAccount: 'Zaten hesabın var mı?',
-            signIn: 'Giriş yap'
+            hasAccount: 'Zaten hesabınız var mı?',
+            signIn: 'Giriş yap',
+            verificationEmailSent: 'Lütfen hesabınızı doğrulamak için e-postanızı kontrol edin'
           },
           forgotPassword: {
             title: 'Şifreni sıfırla',
@@ -324,7 +348,8 @@ const resources = {
             passwordMinLength: 'Şifre en az 6 karakter olmalıdır',
             passwordMatch: 'Şifreler eşleşmiyor'
           }
-        }
+        },
+        confirm: 'Onayla'
       },
       navigation: {
         dashboard: 'Ana Sayfa',
@@ -388,6 +413,10 @@ const resources = {
         noTransactions: 'İşlem bulunamadı',
         budgetSpent: 'bütçeden harcandı',
         loadMore: 'Daha Fazla',
+        emptyState: {
+          title: 'Henüz işlem yok',
+          description: 'İlk işleminizi ekleyerek finansal takibinize başlayın'
+        },
         categories: {
           // Category Groups
           regular: 'Düzenli Gelir',
@@ -466,7 +495,12 @@ const resources = {
             month: 'Bu ay',
             year: 'Bu yıl'
           }
-        }
+        },
+        deleteTitle: 'İşlemi Sil',
+        deleteButton: 'Sil',
+        deleteConfirmation: '{{amount}} tutarındaki {{type}} işlemini silmek istediğinize emin misiniz?',
+        deleteSuccess: 'İşlem başarıyla silindi',
+        deleteError: 'İşlem silinirken bir hata oluştu'
       },
       profile: {
         title: 'Profil',
@@ -515,12 +549,24 @@ const resources = {
             subtitle: 'Uygulama tercihleri ve daha fazlası'
           },
           logout: 'Çıkış Yap',
-          logoutSubtitle: 'Hesabından çıkış yap'
+          logoutSubtitle: 'Hesabından çıkış yap',
+          feedback: {
+            title: 'Geri Bildirim Gönder',
+            subtitle: 'Deneyiminizi iyileştirmemize yardımcı olun',
+            fullName: 'Ad Soyad',
+            fullNamePlaceholder: 'Adınızı ve soyadınızı girin',
+            email: 'E-posta',
+            emailPlaceholder: 'E-posta adresinizi girin',
+            message: 'Geri Bildiriminiz',
+            messagePlaceholder: 'Uygulama hakkında ne düşündüğünüzü bize anlatın...',
+            submit: 'Gönder'
+          }
         },
         notifications: {
           nameUpdated: 'İsminiz başarıyla güncellendi',
           usernameUpdated: 'Kullanıcı adınız başarıyla güncellendi',
-          passwordUpdated: 'Şifreniz başarıyla güncellendi'
+          passwordUpdated: 'Şifreniz başarıyla güncellendi',
+          feedbackSubmitted: 'Geri bildiriminiz için teşekkür ederiz!'
         }
       },
       reminders: {

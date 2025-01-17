@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
@@ -40,26 +40,36 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    // Disable scrolling on mount
+    document.body.style.overflow = 'hidden';
+    
+    // Re-enable scrolling on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8"
+      className="fixed inset-0 flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
       {/* Top Illustration */}
-      <div className="flex-shrink-0 w-full max-w-md lg:max-w-lg mt-8">
+      <div className="w-full max-w-md lg:max-w-lg mt-4 lg:mt-8">
         <LoginSvg className="w-full h-auto" />
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-md flex-1 flex flex-col justify-center">
-        <div className="mb-6">
+      <div className="w-full max-w-md space-y-6 mt-4">
+        <div>
           <h2 className="text-center text-3xl font-extrabold text-white">
             {t('common.auth.login.title')}
           </h2>
         </div>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4 px-6" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-500/10 p-4">
               <div className="text-sm text-red-500">{error}</div>

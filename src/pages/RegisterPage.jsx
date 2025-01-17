@@ -1,21 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { useLanguage } from '../contexts/LanguageContext';
 import LoginSvg from '../assets/login-page-svg.jsx';
 import { motion } from 'framer-motion';
+import i18n from '../i18n';
+import { notify } from '../components/Notifier';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
+    preferred_language: language // Default to current language
   });
+
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' }
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +33,20 @@ export default function RegisterPage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const toggleLanguage = () => {
+    const newLanguage = formData.preferred_language === 'en' ? 'tr' : 'en';
+    
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      preferred_language: newLanguage
+    }));
+
+    // Update localStorage and i18n
+    localStorage.setItem('preferredLanguage', newLanguage);
+    i18n.changeLanguage(newLanguage);
   };
 
   const validateForm = () => {
@@ -57,8 +81,11 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const { error } = await signUp(formData.email, formData.password);
+      const { error } = await signUp(formData.email, formData.password, {
+        preferred_language: formData.preferred_language
+      });
       if (error) throw error;
+      notify.success(t('common.auth.register.verificationEmailSent'));
       navigate('/login');
     } catch (error) {
       setError(error.message);
@@ -67,26 +94,38 @@ export default function RegisterPage() {
     }
   };
 
+  const selectedLanguage = languages.find(lang => lang.code === formData.preferred_language);
+
+  useEffect(() => {
+    // Disable scrolling on mount
+    document.body.style.overflow = 'hidden';
+    
+    // Re-enable scrolling on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8"
+      className="fixed inset-0 flex flex-col items-center bg-[#0f172a] px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
       {/* Top Illustration */}
-      <div className="w-full max-w-md lg:max-w-lg mt-8 lg:mt-12">
+      <div className="w-full max-w-md lg:max-w-lg mt-4 lg:mt-8">
         <LoginSvg className="w-full h-auto" />
       </div>
 
       {/* Form */}
-      <div className="w-full max-w-md space-y-8 mt-8">
+      <div className="w-full max-w-md space-y-6 mt-4">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-white">
             {t('common.auth.register.title')}
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 px-6" onSubmit={handleSubmit}>
           {error && (
             <div className="rounded-md bg-red-500/10 p-4">
               <div className="text-sm text-red-500">{error}</div>
@@ -138,6 +177,19 @@ export default function RegisterPage() {
                 onChange={handleChange}
               />
             </div>
+          </div>
+
+          {/* Language Toggle */}
+          <div className="flex justify-center">
+            <motion.button
+              type="button"
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1e2b4a] rounded-xl hover:bg-[#243351] transition-colors"
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-xl">{selectedLanguage.flag}</span>
+              <span className="text-white font-medium">{selectedLanguage.name}</span>
+            </motion.button>
           </div>
 
           <div>
