@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import LoginSvg from '../assets/login-page-svg.jsx';
 import { motion } from 'framer-motion';
+import { supabase } from '../config/supabase';
+import i18n from '../i18n';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -30,8 +32,33 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
-      if (error) throw error;
+      const { data: signInData, error: signInError } = await signIn(formData.email, formData.password);
+      if (signInError) throw signInError;
+
+      // Get user metadata
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      // Check if this is the first login (no language preference in metadata)
+      if (!user?.user_metadata?.preferred_language) {
+        // Get language preference from localStorage (saved during registration)
+        const savedLanguage = localStorage.getItem('preferredLanguage');
+        if (savedLanguage) {
+          // Update user metadata with saved language preference
+          const { error: metadataError } = await supabase.auth.updateUser({
+            data: { preferred_language: savedLanguage }
+          });
+          if (metadataError) throw metadataError;
+        }
+      }
+
+      // Set language from metadata or localStorage
+      const preferredLanguage = user?.user_metadata?.preferred_language || localStorage.getItem('preferredLanguage');
+      if (preferredLanguage) {
+        localStorage.setItem('preferredLanguage', preferredLanguage);
+        i18n.changeLanguage(preferredLanguage);
+      }
+
       navigate('/dashboard');
     } catch (error) {
       setError(error.message);

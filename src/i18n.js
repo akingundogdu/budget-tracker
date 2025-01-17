@@ -119,6 +119,7 @@ const resources = {
         },
         noTransactions: 'No transactions found',
         budgetSpent: 'of the budget spent',
+        monthlyIncome: 'Monthly Income',
         loadMore: 'Load More',
         emptyState: {
           title: 'No transactions yet',
@@ -412,6 +413,7 @@ const resources = {
         },
         noTransactions: 'İşlem bulunamadı',
         budgetSpent: 'bütçeden harcandı',
+        monthlyIncome: 'Aylık Gelir',
         loadMore: 'Daha Fazla',
         emptyState: {
           title: 'Henüz işlem yok',

@@ -43,10 +43,21 @@ export function LanguageProvider({ children }) {
   }, [language])
 
   const formatMoney = (amount) => {
-    return new Intl.NumberFormat(language === 'tr' ? 'tr-TR' : 'en-US', {
-      style: 'currency',
-      currency: language === 'tr' ? 'TRY' : 'USD',
-    }).format(amount)
+    const locale = language === 'tr' ? 'tr-TR' : 'en-US';
+    const currency = language === 'tr' ? 'TRY' : 'USD';
+    
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    } catch (error) {
+      console.error('Error formatting money:', error);
+      // Fallback to basic formatting if Intl.NumberFormat fails
+      return `${currency} ${amount.toFixed(2)}`;
+    }
   }
 
   const t = (key) => {

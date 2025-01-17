@@ -7,6 +7,7 @@ import LoginSvg from '../assets/login-page-svg.jsx';
 import { motion } from 'framer-motion';
 import i18n from '../i18n';
 import { notify } from '../components/Notifier';
+import { supabase } from '../config/supabase';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -81,10 +82,13 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const { error } = await signUp(formData.email, formData.password, {
-        preferred_language: formData.preferred_language
-      });
-      if (error) throw error;
+      // Register the user
+      const { data: signUpData, error: signUpError } = await signUp(formData.email, formData.password);
+      if (signUpError) throw signUpError;
+
+      // Save language preference to localStorage for later use
+      localStorage.setItem('preferredLanguage', formData.preferred_language);
+      
       notify.success(t('common.auth.register.verificationEmailSent'));
       navigate('/login');
     } catch (error) {
