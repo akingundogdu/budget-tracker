@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import { budgetService } from '../services'
-import { ContentLoading } from './Loading'
+import { ContentLoading, Loading } from './Loading'
 import EmptyState from './EmptyState'
 
 function MonthSelector({ selectedMonth, onMonthChange }) {
@@ -95,6 +95,8 @@ function StatItem({ title, amount, icon: Icon, color, isExpandable, isExpanded, 
 function RecentTransactionCard({ transaction }) {
   const { formatMoney, t } = useLanguage()
   
+  console.log('Transaction data:', transaction)
+  
   return (
     <div className="flex items-center justify-between p-4 bg-[#1e2b4a] rounded-2xl">
       <div className="flex items-center gap-3">
@@ -102,11 +104,19 @@ function RecentTransactionCard({ transaction }) {
           <BanknotesIcon className={`w-5 h-5 ${transaction.type === 'expense' ? 'text-red-500' : 'text-green-500'}`} />
         </div>
         <div>
-          <h4 className="text-white font-medium">{transaction.description}</h4>
-          <p className="text-white/60 text-sm">{transaction.categories?.name}</p>
+          <h4 className="text-white font-medium">{t(`expenses.categories.${transaction.category}`)}</h4>
+          {transaction.description && (
+            <p className="text-white/60 text-sm">{transaction.description}</p>
+          )}
         </div>
       </div>
       <div className="text-right">
+        {transaction.is_regular && (
+          <div className="flex items-center justify-end gap-1 mb-1">
+            <span className="text-sm text-violet-400">{transaction.regular_period}</span>
+            <ArrowPathIcon className="w-4 h-4 text-violet-400" title={t('expenses.recurring')} />
+          </div>
+        )}
         <p className={`font-medium ${transaction.type === 'expense' ? 'text-red-500' : 'text-green-500'}`}>
           {transaction.type === 'expense' ? '-' : '+'}{formatMoney(transaction.amount)}
         </p>
@@ -130,17 +140,47 @@ function Dashboard() {
   })
   const [summaryCards, setSummaryCards] = useState(null)
   const [isBalanceExpanded, setIsBalanceExpanded] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const ITEMS_PER_PAGE = 5
 
-  const loadTransactions = async (dateFilters) => {
+  const loadTransactions = async (dateFilters, pageNum = 1, reset = false) => {
     try {
       setTransactionsLoading(true)
-      const data = await budgetService.getDashboardData(dateFilters)
-      setDashboardData(data)
+      const data = await budgetService.getDashboardData({
+        ...dateFilters,
+        page: pageNum,
+        limit: ITEMS_PER_PAGE
+      })
+      
+      setDashboardData(prev => ({
+        ...prev,
+        recentTransactions: reset ? data.recentTransactions : [...prev.recentTransactions, ...data.recentTransactions]
+      }))
+      setHasMore(data.recentTransactions.length === ITEMS_PER_PAGE)
     } catch (err) {
       setError(err.message)
     } finally {
       setTransactionsLoading(false)
     }
+  }
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    
+    const startDate = new Date()
+    startDate.setMonth(selectedMonth)
+    startDate.setDate(1)
+    
+    const endDate = new Date()
+    endDate.setMonth(selectedMonth + 1)
+    endDate.setDate(0)
+
+    await loadTransactions({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    }, nextPage)
   }
 
   const loadStats = async (dateFilters) => {
@@ -170,9 +210,12 @@ function Dashboard() {
         endDate: endDate.toISOString()
       }
 
+      setPage(1)
+      setHasMore(true)
+
       await Promise.all([
         loadStats(dateFilters),
-        loadTransactions(dateFilters)
+        loadTransactions(dateFilters, 1, true)
       ])
     } catch (err) {
       if (err.message === 'User not authenticated') {
@@ -289,26 +332,48 @@ function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">{t('dashboard.recentTransactions')}</h3>
             <button 
-              onClick={() => loadTransactions({
-                startDate: new Date(new Date().setMonth(selectedMonth, 1)).toISOString(),
-                endDate: new Date(new Date().setMonth(selectedMonth + 1, 0)).toISOString()
-              })}
+              onClick={loadDashboardData}
               className="p-2 rounded-xl bg-[#1e293b] text-white/60 hover:text-white transition-colors"
             >
               <ArrowPathIcon className="w-4 h-4" />
             </button>
           </div>
           
-          {transactionsLoading ? (
+          {transactionsLoading && page === 1 ? (
             <div className="min-h-[200px] bg-[#1e2b4a] rounded-2xl">
               <ContentLoading />
             </div>
           ) : recentTransactions.length > 0 ? (
-            <div className="space-y-3">
-              {recentTransactions.map(transaction => (
-                <RecentTransactionCard key={transaction.id} transaction={transaction} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-3">
+                {recentTransactions.map(transaction => (
+                  <RecentTransactionCard key={transaction.id} transaction={transaction} />
+                ))}
+              </div>
+
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="pt-4"
+                >
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={transactionsLoading}
+                    className="w-full p-4 flex items-center justify-center gap-2 bg-[#1e2b4a] text-white rounded-2xl hover:bg-[#243351] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {transactionsLoading ? (
+                      <>
+                        <Loading size="small" />
+                        {t('common.loading')}
+                      </>
+                    ) : (
+                      t('expenses.loadMore')
+                    )}
+                  </button>
+                </motion.div>
+              )}
+            </>
           ) : (
             <EmptyState
               title={t('dashboard.emptyState.title')}

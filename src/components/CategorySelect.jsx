@@ -1,112 +1,67 @@
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../contexts/LanguageContext';
-
-const categories = {
-  income: {
-    billsAndIncome: [
-      { id: 'salary', icon: '💰' },
-      { id: 'freelance', icon: '💻' },
-      { id: 'investments', icon: '📈' },
-      { id: 'rental', icon: '🏠' },
-    ],
-    otherIncome: [
-      { id: 'gifts', icon: '🎁' },
-      { id: 'refunds', icon: '💸' },
-      { id: 'lottery', icon: '🎰' },
-      { id: 'other', icon: '📝' },
-    ],
-  },
-  expense: {
-    billsAndUtilities: [
-      { id: 'phone', icon: '📱' },
-      { id: 'water', icon: '💧' },
-      { id: 'gas', icon: '🔥' },
-      { id: 'internet', icon: '📶' },
-      { id: 'rent', icon: '🏠' },
-      { id: 'tv', icon: '📺' },
-    ],
-    healthAndFitness: [
-      { id: 'run', icon: '👟' },
-      { id: 'doctor', icon: '🏥' },
-      { id: 'medicine', icon: '💊' },
-      { id: 'exercise', icon: '🏋️' },
-      { id: 'cycling', icon: '🚲' },
-      { id: 'swim', icon: '🏊' },
-    ],
-    foodAndShopping: [
-      { id: 'grocery', icon: '🛒' },
-      { id: 'coffee', icon: '☕' },
-      { id: 'drinks', icon: '🍷' },
-      { id: 'restaurants', icon: '🍽️' },
-    ],
-  },
-};
+import { useTranslation } from 'react-i18next';
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, CATEGORY_GROUPS } from '../constants/categories';
 
 function CategorySelect({ onClose, onSelect, type = 'expense' }) {
-  const { t } = useLanguage();
-  const categoryList = categories[type];
+  const { t } = useTranslation();
+
+  const categories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const groups = CATEGORY_GROUPS[type];
+
+  // Group categories
+  const groupedCategories = categories.reduce((acc, category) => {
+    if (!acc[category.group]) {
+      acc[category.group] = [];
+    }
+    acc[category.group].push(category);
+    return acc;
+  }, {});
 
   return (
-    <div className="fixed inset-0 z-50">
-      {/* Modal Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black pointer-events-none"
-      />
-      
-      {/* Category Selector */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 z-50"
+      onClick={onClose}
+    >
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="absolute bottom-0 inset-x-0 bg-[#1e2b4a] rounded-t-3xl"
+        transition={{ type: 'spring', damping: 25, stiffness: 500 }}
+        className="absolute bottom-0 left-0 right-0 bg-[#162036] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
       >
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg bg-[#243351] text-white hover:bg-[#2d3c5d]"
-            >
-              <ArrowLeftIcon className="w-6 h-6" />
-            </button>
-            <h2 className="text-xl font-semibold text-white">{t('expenses.form.category')}</h2>
-            <div className="w-10" /> {/* Spacer for alignment */}
-          </div>
+        <h2 className="text-xl font-semibold text-white mb-6">
+          {t('expenses.form.category')}
+        </h2>
 
-          {/* Categories */}
-          <div className="space-y-6">
-            {Object.entries(categoryList).map(([section, items]) => (
-              <div key={section}>
-                <h2 className="text-xl font-semibold text-white/90 mb-4">
-                  {t('expenses.categories.' + section)}
-                </h2>
-                <div className="grid grid-cols-4 gap-4">
-                  {items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => onSelect({ ...item, name: t('expenses.categories.' + item.id) })}
-                      className="flex flex-col items-center space-y-2"
-                    >
-                      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-[#243351] hover:bg-[#2d3c5d]">
-                        <span className="text-2xl">{item.icon}</span>
-                      </div>
-                      <span className="text-sm text-white text-center">
-                        {t('expenses.categories.' + item.id)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+        <div className="space-y-6">
+          {Object.entries(groupedCategories).map(([groupId, groupCategories]) => (
+            <div key={groupId}>
+              <h3 className="text-white/60 text-sm mb-3">
+                {t(`expenses.categories.${groupId}`)}
+              </h3>
+              <div className="grid grid-cols-4 gap-3">
+                {groupCategories.map(category => (
+                  <button
+                    key={category.id}
+                    onClick={() => onSelect(category)}
+                    className="flex flex-col items-center p-3 rounded-lg bg-[#1e2b4a] hover:bg-[#243351] transition-colors"
+                  >
+                    <span className="text-2xl mb-2">{category.icon}</span>
+                    <span className="text-white text-sm text-center">
+                      {t(`expenses.categories.${category.id}`)}
+                    </span>
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 

@@ -8,12 +8,14 @@ import CategorySelect from '../components/CategorySelect'
 import DatePicker from '../components/DatePicker'
 import ReminderSelect from '../components/ReminderSelect'
 import i18n from '../i18n'
+import { useTranslation } from 'react-i18next'
 
 function AddTransactionPage() {
   const navigate = useNavigate()
   const { type } = useParams()
-  const { t, formatMoney } = useLanguage()
+  const { t } = useTranslation()
   const [amount, setAmount] = useState('')
+  const [description, setDescription] = useState('')
   const [showCategorySelect, setShowCategorySelect] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showReminderSelect, setShowReminderSelect] = useState(false)
@@ -27,6 +29,7 @@ function AddTransactionPage() {
   })
   const [isRegular, setIsRegular] = useState(false)
   const [regularPeriod, setRegularPeriod] = useState('monthly')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const periods = useMemo(() => [
     { id: 'weekly', label: t('expenses.form.regularPeriod.weekly') },
@@ -92,27 +95,56 @@ function AddTransactionPage() {
     return `${timeText} ${methodText}`;
   }
 
+  // Check if form is valid
+  const isFormValid = useMemo(() => {
+    return amount && amount !== '0' && selectedCategory && selectedDate;
+  }, [amount, selectedCategory, selectedDate]);
+
   const handleSave = async () => {
     try {
-      if (!amount || !selectedCategory || !selectedDate) {
-        // Show error
+      if (!isFormValid) {
         return;
       }
 
+      setIsSubmitting(true)
+
+      // Create the transaction
       const transaction = {
         amount: parseFloat(amount),
-        category_id: selectedCategory.id,
+        category: selectedCategory.id,
         type,
         date: selectedDate.toISOString(),
         is_regular: isRegular,
-        regular_period: isRegular ? regularPeriod : null
+        regular_period: isRegular ? regularPeriod : null,
+        description: selectedCategory.id === 'other' ? description : null
       };
 
-      await budgetService.transactions.create(transaction);
+      const savedTransaction = await budgetService.transactions.create(transaction);
+
+      // If reminder is enabled, create a reminder
+      if (reminderSettings.enabled) {
+        const reminderDate = new Date(selectedDate);
+        reminderDate.setDate(reminderDate.getDate() - reminderSettings.daysBeforeTransaction);
+
+        const reminder = {
+          transaction_id: savedTransaction.id,
+          reminder_date: reminderDate.toISOString(),
+          notification_type: reminderSettings.pushEnabled && reminderSettings.emailEnabled 
+            ? 'both' 
+            : reminderSettings.pushEnabled 
+              ? 'push' 
+              : 'email'
+        };
+
+        await budgetService.reminders.create(reminder);
+      }
+
       navigate(-1);
     } catch (error) {
       console.error('Error saving transaction:', error);
       // Show error
+    } finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -164,10 +196,24 @@ function AddTransactionPage() {
               {selectedCategory?.icon || '📁'}
             </div>
             <span className="text-white/60">
-              {selectedCategory?.name || t('expenses.form.category')}
+              {selectedCategory ? t(`expenses.categories.${selectedCategory.id}`) : t('expenses.form.category')}
             </span>
             <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
           </button>
+
+          {/* Description Input - Only show when 'other' category is selected */}
+          {selectedCategory?.id === 'other' && (
+            <div className="bg-[#1e2b4a] p-4 rounded-lg mb-4">
+              <label className="block text-white/60 mb-2">{t('expenses.form.description')}</label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('expenses.form.descriptionPlaceholder')}
+                className="w-full bg-[#243351] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          )}
 
           {/* Date Selection */}
           <button
@@ -256,9 +302,12 @@ function AddTransactionPage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleSave}
-            className="w-full bg-primary text-white py-4 rounded-xl font-medium"
+            disabled={isSubmitting || !isFormValid}
+            className={`w-full bg-primary text-white py-4 rounded-xl font-medium transition-all ${
+              isSubmitting || !isFormValid ? 'opacity-50 cursor-not-allowed bg-gray-500' : 'hover:bg-primary/90'
+            }`}
           >
-            {t('common.save')}
+            {isSubmitting ? t('common.saving') : t('common.save')}
           </motion.button>
         </div>
       </div>

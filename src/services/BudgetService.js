@@ -1,9 +1,8 @@
-import { transactionService, categoryService, reminderService, authService } from './supabase';
+import { transactionService, reminderService, authService } from './supabase';
 
 class BudgetService {
   constructor() {
     this.transactions = transactionService;
-    this.categories = categoryService;
     this.reminders = reminderService;
     this.auth = authService;
     this._currentUser = null;
@@ -75,8 +74,8 @@ class BudgetService {
     }
   }
 
-  // Category management
-  async getCategoryAnalytics(categoryId, timeRange = 'month') {
+  // Category analytics
+  async getCategoryAnalytics(category, timeRange = 'month') {
     const now = new Date();
     let startDate, endDate;
 
@@ -100,7 +99,7 @@ class BudgetService {
 
     try {
       const transactions = await this.transactions.getAll({
-        categoryId,
+        category,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       });

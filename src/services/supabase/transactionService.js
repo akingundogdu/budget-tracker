@@ -5,7 +5,7 @@ class TransactionService {
     const {
       startDate,
       endDate,
-      categoryId,
+      category,
       type,
       searchQuery,
       sortBy = 'date',
@@ -16,15 +16,7 @@ class TransactionService {
 
     let query = supabase
       .from('transactions')
-      .select(`
-        *,
-        categories (
-          id,
-          name,
-          color,
-          icon
-        )
-      `)
+      .select('*')
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range((page - 1) * limit, page * limit - 1);
 
@@ -34,14 +26,14 @@ class TransactionService {
     if (endDate) {
       query = query.lte('date', endDate);
     }
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
+    if (category) {
+      query = query.eq('category', category);
     }
     if (type) {
       query = query.eq('type', type);
     }
     if (searchQuery) {
-      query = query.ilike('description', `%${searchQuery}%`);
+      query = query.ilike('category', `%${searchQuery}%`);
     }
 
     const { data, error } = await query;
@@ -52,15 +44,7 @@ class TransactionService {
   async getById(id) {
     const { data, error } = await supabase
       .from('transactions')
-      .select(`
-        *,
-        categories (
-          id,
-          name,
-          color,
-          icon
-        )
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -103,21 +87,11 @@ class TransactionService {
   }
 
   async getStats(filters = {}) {
-    const { startDate, endDate, categoryId } = filters;
+    const { startDate, endDate, category } = filters;
 
     let query = supabase
       .from('transactions')
-      .select(`
-        type,
-        amount,
-        category_id,
-        is_regular,
-        regular_period,
-        categories (
-          name,
-          color
-        )
-      `);
+      .select('*');
 
     if (startDate) {
       query = query.gte('date', startDate);
@@ -125,8 +99,8 @@ class TransactionService {
     if (endDate) {
       query = query.lte('date', endDate);
     }
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
+    if (category) {
+      query = query.eq('category', category);
     }
 
     const { data, error } = await query;
@@ -145,26 +119,27 @@ class TransactionService {
       return acc;
     }, {});
 
+    // Group by category
+    const byCategory = Object.values(data.reduce((acc, t) => {
+      const key = t.category;
+      if (!acc[key]) {
+        acc[key] = {
+          category: t.category,
+          amount: 0,
+          count: 0
+        };
+      }
+      acc[key].amount += t.amount;
+      acc[key].count += 1;
+      return acc;
+    }, {}));
+
     return {
       totalIncome: data.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
       totalExpenses: expenses.reduce((sum, t) => sum + t.amount, 0),
       regularExpenses: regularExpenses.reduce((sum, t) => sum + t.amount, 0),
       regularExpensesByPeriod,
-      byCategory: Object.values(data.reduce((acc, t) => {
-        const key = t.category_id;
-        if (!acc[key]) {
-          acc[key] = {
-            categoryId: t.category_id,
-            categoryName: t.categories?.name,
-            categoryColor: t.categories?.color,
-            amount: 0,
-            count: 0
-          };
-        }
-        acc[key].amount += t.amount;
-        acc[key].count += 1;
-        return acc;
-      }, {}))
+      byCategory
     };
   }
 }

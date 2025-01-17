@@ -6,6 +6,7 @@ const resources = {
     translation: {
       common: {
         save: 'Save',
+        saving: 'Saving...',
         cancel: 'Cancel',
         add: 'Add',
         edit: 'Edit',
@@ -114,13 +115,17 @@ const resources = {
           addNewIncome: 'Add New Income',
           addNewExpense: 'Add New Expense'
         },
+        noTransactions: 'No transactions found',
+        budgetSpent: 'of the budget spent',
+        loadMore: 'Load More',
         categories: {
           // Category Groups
-          billsAndIncome: 'Bills & Income',
-          otherIncome: 'Other Income',
-          billsAndUtilities: 'Bills & Utilities',
-          healthAndFitness: 'Health & Fitness',
-          foodAndShopping: 'Food & Shopping',
+          regular: 'Regular Income',
+          investments: 'Investments',
+          other: 'Other',
+          bills: 'Bills & Utilities',
+          food: 'Food & Shopping',
+          health: 'Health & Fitness',
 
           // Income Categories
           salary: 'Salary',
@@ -133,31 +138,38 @@ const resources = {
           other: 'Other',
 
           // Expense Categories - Bills & Utilities
+          rent: 'Rent',
           phone: 'Phone Bill',
           water: 'Water Bill',
           gas: 'Gas Bill',
           internet: 'Internet Bill',
-          rent: 'Rent',
           tv: 'TV',
-
-          // Expense Categories - Health & Fitness
-          run: 'Run',
-          doctor: 'Doctor',
-          medicine: 'Medicine',
-          exercise: 'Exercise',
-          cycling: 'Cycling',
-          swim: 'Swim',
 
           // Expense Categories - Food & Shopping
           grocery: 'Grocery',
+          restaurants: 'Restaurants',
           coffee: 'Tea & Coffee',
           drinks: 'Drinks',
-          restaurants: 'Restaurants'
+
+          // Expense Categories - Health & Fitness
+          doctor: 'Doctor',
+          medicine: 'Medicine',
+          exercise: 'Exercise',
+          run: 'Run',
+          cycling: 'Cycling',
+          swim: 'Swim',
+
+          // Other Expense Categories
+          entertainment: 'Entertainment',
+          education: 'Education',
+          shopping: 'Shopping',
+          transportation: 'Transportation'
         },
         form: {
           amount: 'Amount',
           category: 'Category',
           description: 'Description',
+          descriptionPlaceholder: 'Enter custom category name (optional)',
           date: 'Date',
           regularExpense: 'Regular Expense',
           regularExpenseHint: 'Mark this as a recurring expense',
@@ -264,6 +276,7 @@ const resources = {
     translation: {
       common: {
         save: 'Kaydet',
+        saving: 'Kaydediliyor...',
         cancel: 'İptal',
         add: 'Ekle',
         edit: 'Düzenle',
@@ -372,13 +385,17 @@ const resources = {
           addNewIncome: 'Yeni Gelir Ekle',
           addNewExpense: 'Yeni Gider Ekle'
         },
+        noTransactions: 'İşlem bulunamadı',
+        budgetSpent: 'bütçeden harcandı',
+        loadMore: 'Daha Fazla',
         categories: {
           // Category Groups
-          billsAndIncome: 'Faturalar & Gelir',
-          otherIncome: 'Diğer Gelirler',
-          billsAndUtilities: 'Faturalar & Ödemeler',
-          healthAndFitness: 'Sağlık & Spor',
-          foodAndShopping: 'Yemek & Alışveriş',
+          regular: 'Düzenli Gelir',
+          investments: 'Yatırımlar',
+          other: 'Diğer',
+          bills: 'Faturalar & Ödemeler',
+          food: 'Yemek & Alışveriş',
+          health: 'Sağlık & Spor',
 
           // Income Categories
           salary: 'Maaş',
@@ -391,31 +408,38 @@ const resources = {
           other: 'Diğer',
 
           // Expense Categories - Bills & Utilities
+          rent: 'Kira',
           phone: 'Telefon Faturası',
           water: 'Su Faturası',
           gas: 'Doğalgaz Faturası',
           internet: 'İnternet Faturası',
-          rent: 'Kira',
           tv: 'TV',
-
-          // Expense Categories - Health & Fitness
-          run: 'Koşu',
-          doctor: 'Doktor',
-          medicine: 'İlaç',
-          exercise: 'Egzersiz',
-          cycling: 'Bisiklet',
-          swim: 'Yüzme',
 
           // Expense Categories - Food & Shopping
           grocery: 'Market',
+          restaurants: 'Restoranlar',
           coffee: 'Çay & Kahve',
           drinks: 'İçecekler',
-          restaurants: 'Restoranlar'
+
+          // Expense Categories - Health & Fitness
+          doctor: 'Doktor',
+          medicine: 'İlaç',
+          exercise: 'Egzersiz',
+          run: 'Koşu',
+          cycling: 'Bisiklet',
+          swim: 'Yüzme',
+
+          // Other Expense Categories
+          entertainment: 'Eğlence',
+          education: 'Eğitim',
+          shopping: 'Alışveriş',
+          transportation: 'Ulaşım'
         },
         form: {
           amount: 'Tutar',
           category: 'Kategori',
           description: 'Açıklama',
+          descriptionPlaceholder: 'Özel kategori adı girin (opsiyonel)',
           date: 'Tarih',
           regularExpense: 'Düzenli Gider',
           regularExpenseHint: 'Bu gideri düzenli gider olarak işaretle',
