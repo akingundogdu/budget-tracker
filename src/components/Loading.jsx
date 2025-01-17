@@ -19,7 +19,7 @@ export function ContentLoading({ className = '' }) {
   const { t } = useLanguage()
   
   return (
-    <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
+    <div className={`flex flex-col items-center justify-center p-4 ${className}`}>
       <div className="w-10 h-10 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       <p className="text-white/60 mt-4">{t('common.loading')}</p>
     </div>

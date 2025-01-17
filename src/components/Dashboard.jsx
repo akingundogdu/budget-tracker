@@ -306,7 +306,7 @@ function Dashboard() {
 
         {/* Stats */}
         {statsLoading ? (
-          <div className="h-[448px] bg-[#1e2b4a] rounded-[32px]">
+          <div className="h-[100px] bg-[#1e2b4a] rounded-t-[32px]">
             <ContentLoading />
           </div>
         ) : (
@@ -340,7 +340,7 @@ function Dashboard() {
           </div>
           
           {transactionsLoading && page === 1 ? (
-            <div className="min-h-[200px] bg-[#1e2b4a] rounded-2xl">
+            <div className="min-h-[400px] bg-[#1e2b4a] rounded-2xl">
               <ContentLoading />
             </div>
           ) : recentTransactions.length > 0 ? (
