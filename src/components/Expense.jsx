@@ -13,7 +13,9 @@ function Expense() {
   const navigate = useNavigate()
   const { formatMoney } = useLanguage()
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState('expense')
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('activeTransactionTab') || 'expense'
+  })
   const [stats, setStats] = useState({
     totalAmount: 0,
     totalBudget: 25350.00
@@ -21,6 +23,10 @@ function Expense() {
 
   useEffect(() => {
     fetchStats()
+  }, [activeTab])
+
+  useEffect(() => {
+    localStorage.setItem('activeTransactionTab', activeTab)
   }, [activeTab])
 
   const fetchStats = async () => {

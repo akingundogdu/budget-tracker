@@ -21,6 +21,32 @@ const resources = {
         setDate: 'Set Date',
         setReminder: 'Set Reminder',
         loading: 'Loading...',
+        datePicker: {
+          weekDays: {
+            sun: 'SUN',
+            mon: 'MON',
+            tue: 'TUE',
+            wed: 'WED',
+            thu: 'THU',
+            fri: 'FRI',
+            sat: 'SAT'
+          },
+          months: {
+            january: 'January',
+            february: 'February',
+            march: 'March',
+            april: 'April',
+            may: 'May',
+            june: 'June',
+            july: 'July',
+            august: 'August',
+            september: 'September',
+            october: 'October',
+            november: 'November',
+            december: 'December'
+          },
+          setDate: 'Set Date'
+        },
         auth: {
           login: {
             title: 'Login',
@@ -315,6 +341,32 @@ const resources = {
         setDate: 'Tarih Seç',
         setReminder: 'Hatırlatıcı Ayarla',
         loading: 'Yükleniyor...',
+        datePicker: {
+          weekDays: {
+            sun: 'PAZ',
+            mon: 'PTS',
+            tue: 'SAL',
+            wed: 'ÇAR',
+            thu: 'PER',
+            fri: 'CUM',
+            sat: 'CTS'
+          },
+          months: {
+            january: 'Ocak',
+            february: 'Şubat',
+            march: 'Mart',
+            april: 'Nisan',
+            may: 'Mayıs',
+            june: 'Haziran',
+            july: 'Temmuz',
+            august: 'Ağustos',
+            september: 'Eylül',
+            october: 'Ekim',
+            november: 'Kasım',
+            december: 'Aralık'
+          },
+          setDate: 'Tarih Seç'
+        },
         auth: {
           login: {
             title: 'Giriş',

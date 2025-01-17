@@ -1,14 +1,36 @@
 import { motion } from 'framer-motion';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 function DatePicker({ onClose, onSelect, selectedDate: initialSelectedDate }) {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(initialSelectedDate || new Date());
   const [selectedDay, setSelectedDay] = useState(initialSelectedDate ? initialSelectedDate.getDate() : null);
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    t('common.datePicker.months.january'),
+    t('common.datePicker.months.february'),
+    t('common.datePicker.months.march'),
+    t('common.datePicker.months.april'),
+    t('common.datePicker.months.may'),
+    t('common.datePicker.months.june'),
+    t('common.datePicker.months.july'),
+    t('common.datePicker.months.august'),
+    t('common.datePicker.months.september'),
+    t('common.datePicker.months.october'),
+    t('common.datePicker.months.november'),
+    t('common.datePicker.months.december')
+  ];
+
+  const weekDays = [
+    t('common.datePicker.weekDays.sun'),
+    t('common.datePicker.weekDays.mon'),
+    t('common.datePicker.weekDays.tue'),
+    t('common.datePicker.weekDays.wed'),
+    t('common.datePicker.weekDays.thu'),
+    t('common.datePicker.weekDays.fri'),
+    t('common.datePicker.weekDays.sat')
   ];
 
   const daysInMonth = new Date(
@@ -86,7 +108,7 @@ function DatePicker({ onClose, onSelect, selectedDate: initialSelectedDate }) {
 
           {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-4 mb-6">
-            {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
+            {weekDays.map((day) => (
               <div key={day} className="text-center text-sm text-white/40 font-medium">
                 {day}
               </div>
@@ -116,7 +138,7 @@ function DatePicker({ onClose, onSelect, selectedDate: initialSelectedDate }) {
                 ? 'bg-primary hover:bg-primary-600' 
                 : 'bg-primary/50 cursor-not-allowed'}`}
           >
-            Set Date
+            {t('common.datePicker.setDate')}
           </button>
         </div>
       </motion.div>
