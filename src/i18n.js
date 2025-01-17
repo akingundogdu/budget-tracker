@@ -137,6 +137,7 @@ const resources = {
       expenses: {
         title: 'Expenses',
         addNew: 'Add New Expense',
+        addNewDescription: 'Add details about your new expense',
         menu: {
           income: 'Income',
           expense: 'Expense',
@@ -235,6 +236,10 @@ const resources = {
         deleteConfirmation: 'Are you sure you want to delete {{type}} transaction of {{amount}}?',
         deleteSuccess: 'Transaction deleted successfully',
         deleteError: 'Failed to delete transaction'
+      },
+      income: {
+        addNew: 'Add New Income',
+        addNewDescription: 'Add details about your new income'
       },
       profile: {
         title: 'Profile',
@@ -457,6 +462,7 @@ const resources = {
       expenses: {
         title: 'Harcamalar',
         addNew: 'Yeni Harcama Ekle',
+        addNewDescription: 'Yeni harcamanız hakkında detay ekleyin',
         menu: {
           income: 'Gelir',
           expense: 'Gider',
@@ -555,6 +561,10 @@ const resources = {
         deleteConfirmation: '{{amount}} tutarındaki {{type}} işlemini silmek istediğinize emin misiniz?',
         deleteSuccess: 'İşlem başarıyla silindi',
         deleteError: 'İşlem silinirken bir hata oluştu'
+      },
+      income: {
+        addNew: 'Yeni Gelir Ekle',
+        addNewDescription: 'Yeni geliriniz hakkında detay ekleyin'
       },
       profile: {
         title: 'Profil',

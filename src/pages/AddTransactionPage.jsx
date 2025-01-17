@@ -13,8 +13,9 @@ import { useTranslation } from 'react-i18next'
 function AddTransactionPage() {
   const navigate = useNavigate()
   const { type } = useParams()
-  const { t } = useTranslation()
+  const { t, formatMoney } = useLanguage()
   const [amount, setAmount] = useState('')
+  const [displayAmount, setDisplayAmount] = useState('')
   const [description, setDescription] = useState('')
   const [showCategorySelect, setShowCategorySelect] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
@@ -39,10 +40,34 @@ function AddTransactionPage() {
   ], [t])
 
   const handleAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9.]/g, '')
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value)
+    let value = e.target.value
+
+    // Remove all non-numeric characters
+    value = value.replace(/[^0-9]/g, '')
+    
+    // Convert to number and format
+    if (value) {
+      const numericValue = parseInt(value, 10) / 100
+      setAmount(numericValue.toString())
+      setDisplayAmount(formatMoney(numericValue))
+    } else {
+      setAmount('')
+      setDisplayAmount('')
     }
+  }
+
+  const handleAmountBlur = () => {
+    if (amount) {
+      const numericValue = parseFloat(amount)
+      if (!isNaN(numericValue)) {
+        setDisplayAmount(formatMoney(numericValue))
+      }
+    }
+  }
+
+  const handleAmountFocus = () => {
+    // When focusing, show the raw number for editing
+    setDisplayAmount(amount)
   }
 
   const handleCategorySelect = (category) => {
@@ -173,16 +198,13 @@ function AddTransactionPage() {
           <div className="bg-[#1e2b4a] p-4 rounded-lg mb-4">
             <label className="block text-white/60 mb-2">{t('expenses.form.amount')}</label>
             <div className="relative">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 text-3xl text-white/60 font-semibold">
-                {i18n.language === 'tr' ? '₺' : '$'}
-              </div>
               <input
                 type="text"
-                inputMode="decimal"
-                value={amount}
+                inputMode="numeric"
+                value={displayAmount}
                 onChange={handleAmountChange}
-                className="w-full bg-transparent text-3xl text-white font-semibold focus:outline-none pl-8"
-                placeholder="0.00"
+                className="w-full bg-transparent text-3xl text-white font-semibold focus:outline-none"
+                placeholder={formatMoney(0)}
               />
             </div>
           </div>

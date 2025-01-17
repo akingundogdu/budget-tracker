@@ -4,9 +4,9 @@
 2. done - dil seciminde bug var ilk sectikten sonra default english ilerliyor 
 3. done - dili direk default olarak ingilziceye set et 
 4. done - date picket set date turkcesi yok 
-5. yeni income eklediginde otomatik expense secili geliyor listeleme ekraninda nerde secildi ise o geri gelmesi gerek 
-6. dashboard ekraninda yeni gelir ekle butonuda olmali 
-7. income giris ekranindaki amount kismi noktali olmali 
+5. done - yeni income eklediginde otomatik expense secili geliyor listeleme ekraninda nerde secildi ise o geri gelmesi gerek 
+6. done - dashboard ekraninda yeni gelir ekle butonuda olmali 
+7. done - income giris ekranindaki amount kismi noktali olmali 
 8. income ekraninda eger aile modu aktif ise kimin adina fatura girdigini falan sececegimiz alan ekle
 9. reegular expense yada gelir girildiginde veritabaninda secilen aydan itibaren yil sonuna kadar yada iki datetime arasina kadar otomatik verileri girmesi gerekiyor 
 10. expense itemlara tiklayinca detay sayfasinda butun detaylari gostermeliyiz 
