@@ -36,7 +36,14 @@ class BudgetService {
         throw new Error('User not authenticated');
       }
 
-      const transactions = await this.transactions.getAll({ ...filters, limit: 10 });
+      const { startDate, endDate, page = 1, limit = 10 } = filters;
+      
+      const transactions = await this.transactions.getAll({
+        startDate,
+        endDate,
+        page,
+        limit
+      });
 
       return {
         recentTransactions: transactions

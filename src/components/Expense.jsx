@@ -18,7 +18,7 @@ function Expense() {
   })
   const [stats, setStats] = useState({
     totalAmount: 0,
-    totalBudget: 25350.00
+    totalBudget: 0
   })
 
   useEffect(() => {
@@ -31,7 +31,12 @@ function Expense() {
 
   const fetchStats = async () => {
     try {
-      const stats = await budgetService.transactions.getStats()
+      // Get current month's date range
+      const today = new Date()
+      const startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
+
+      const stats = await budgetService.transactions.getStats({ startDate, endDate })
       setStats({
         totalAmount: activeTab === 'expense' ? stats.totalExpenses : stats.totalIncome,
         totalBudget: stats.totalIncome

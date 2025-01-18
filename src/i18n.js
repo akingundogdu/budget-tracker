@@ -5,6 +5,7 @@ const resources = {
   en: {
     translation: {
       common: {
+        user: 'User',
         save: 'Save',
         saving: 'Saving...',
         cancel: 'Cancel',
@@ -353,6 +354,7 @@ const resources = {
   tr: {
     translation: {
       common: {
+        user: 'Kullanıcı',
         save: 'Kaydet',
         saving: 'Kaydediliyor...',
         cancel: 'İptal',

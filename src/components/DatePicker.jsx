@@ -5,8 +5,20 @@ import { useTranslation } from 'react-i18next';
 
 function DatePicker({ onClose, onSelect, selectedDate: initialSelectedDate }) {
   const { t } = useTranslation();
-  const [currentDate, setCurrentDate] = useState(initialSelectedDate || new Date());
-  const [selectedDay, setSelectedDay] = useState(initialSelectedDate ? initialSelectedDate.getDate() : null);
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(initialSelectedDate || today);
+  const [selectedDay, setSelectedDay] = useState(
+    initialSelectedDate ? initialSelectedDate.getDate() : today.getDate()
+  );
+
+  // Eğer bugünün ayı ve yılı seçili ise, bugünün gününü seç
+  useState(() => {
+    if (!initialSelectedDate && 
+        currentDate.getMonth() === today.getMonth() && 
+        currentDate.getFullYear() === today.getFullYear()) {
+      setSelectedDay(today.getDate());
+    }
+  }, []);
 
   const monthNames = [
     t('common.datePicker.months.january'),

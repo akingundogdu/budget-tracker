@@ -1,3 +1,4 @@
+import { tr } from 'framer-motion/client'
 import { supabase } from './index'
 
 const transactionService = {
@@ -29,7 +30,7 @@ const transactionService = {
     return data
   },
 
-  getAll: async ({ type, page = 1, limit = 10 }) => {
+  getAll: async ({ type, page = 1, limit = 10, startDate, endDate }) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
@@ -44,13 +45,29 @@ const transactionService = {
     const start = (page - 1) * limit
     const end = start + limit - 1
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
-      .eq('type', type)
       .order('date', { ascending: false })
-      .range(start, end)
+
+    // Apply type filter if provided
+    if (type) {
+      query = query.eq('type', type)
+    }
+
+    // Apply date filters if provided
+    if (startDate) {
+      query = query.gte('date', startDate)
+    }
+    if (endDate) {
+      query = query.lte('date', endDate)
+    }
+
+    // Apply pagination
+    query = query.range(start, end)
+
+    const { data, error } = await query
 
     if (error) {
       throw error
@@ -59,7 +76,7 @@ const transactionService = {
     return data
   },
 
-  getStats: async () => {
+  getStats: async ({ startDate, endDate } = {}) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
@@ -71,46 +88,37 @@ const transactionService = {
       throw new Error('User not authenticated')
     }
 
-    const today = new Date()
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-
-    // Get regular transactions for this month
-    const { data: regularTransactions, error: regularError } = await supabase
-      .from('transactions')
-      .select('amount, type')
-      .eq('user_id', user.id)
-      .eq('is_regular', true)
-      .gte('recurring_start_date', firstDayOfMonth.toISOString())
-      .lte('recurring_end_date', lastDayOfMonth.toISOString())
-
-    // Get non-regular transactions for this month
-    const { data: nonRegularTransactions, error: nonRegularError } = await supabase
-      .from('transactions')
-      .select('amount, type')
-      .eq('user_id', user.id)
-      .eq('is_regular', false)
-      .gte('date', firstDayOfMonth.toISOString())
-      .lte('date', lastDayOfMonth.toISOString())
-
-    if (regularError || nonRegularError) {
-      throw regularError || nonRegularError
+    // If no dates provided, use current month
+    if (!startDate || !endDate) {
+      const today = new Date()
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
     }
 
-    const allTransactions = [...(regularTransactions || []), ...(nonRegularTransactions || [])]
+    // Get all transactions for the selected month (both regular and non-regular)
+    const { data: transactions, error } = await supabase
+      .from('transactions')
+      .select('amount, type, is_regular')
+      .eq('user_id', user.id)
+      .gte('date', startDate)
+      .lte('date', endDate)
 
-    const totalIncome = allTransactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
-
-    const totalExpenses = allTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
-
-    return {
-      totalIncome,
-      totalExpenses
+    if (error) {
+      throw error
     }
+
+    // Calculate totals
+    const totals = (transactions || []).reduce((acc, t) => ({
+      totalIncome: acc.totalIncome + (t.type === 'income' ? t.amount : 0),
+      totalExpenses: acc.totalExpenses + (t.type === 'expense' ? t.amount : 0),
+      regularExpenses: acc.regularExpenses + (t.type === 'expense' && t.is_regular ? t.amount : 0)
+    }), {
+      totalIncome: 0,
+      totalExpenses: 0,
+      regularExpenses: 0
+    })
+
+    return totals
   },
 
   delete: async (id) => {
