@@ -113,7 +113,7 @@ function RecentTransactionCard({ transaction }) {
       <div className="text-right">
         {transaction.is_regular && (
           <div className="flex items-center justify-end gap-1 mb-1">
-            <span className="text-sm text-violet-400">{transaction.regular_period}</span>
+            <span className="text-sm text-violet-400">{t(`expenses.regularPeriods.${transaction.regular_period}`)}</span>
             <ArrowPathIcon className="w-4 h-4 text-violet-400" title={t('expenses.recurring')} />
           </div>
         )}

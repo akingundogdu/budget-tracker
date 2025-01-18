@@ -144,11 +144,19 @@ const resources = {
           addNewIncome: 'Add New Income',
           addNewExpense: 'Add New Expense'
         },
+        regularPeriods: {
+          daily: 'Daily',
+          weekly: 'Weekly',
+          monthly: 'Monthly',
+          quarterly: 'Quarterly',
+          yearly: 'Yearly'
+        },
         paymentMethods: {
           title: 'Payment Method',
           select: 'Select Payment Method',
           creditCard: 'Credit Card',
           creditCardDesc: 'Pay with credit or debit card',
+          credit_card: 'Credit Card',
           bank: 'Bank Transfer',
           bankDesc: 'Direct bank transfer or EFT',
           cash: 'Cash',
@@ -225,7 +233,12 @@ const resources = {
             monthly: 'Monthly',
             quarterly: 'Quarterly',
             yearly: 'Yearly'
-          }
+          },
+          startDate: 'Start Date',
+          endDate: 'End Date',
+          selectStartDate: 'Select start date',
+          selectEndDate: 'Select end date',
+          paymentMethod: 'Payment Method'
         },
         filter: {
           sortBy: 'Sort by',
@@ -479,11 +492,19 @@ const resources = {
           addNewIncome: 'Yeni Gelir Ekle',
           addNewExpense: 'Yeni Gider Ekle'
         },
+        regularPeriods: {
+          daily: 'Günlük',
+          weekly: 'Haftalık',
+          monthly: 'Aylık',
+          quarterly: '3 Aylık',
+          yearly: 'Yıllık'
+        },
         paymentMethods: {
           title: 'Ödeme Yöntem',
           select: 'Ödeme Yöntemi Seç',
           creditCard: 'Kredi Kartı',
           creditCardDesc: 'Kredi veya debi kartı ile ödeme',
+          credit_card: 'Kredi Kartı',
           bank: 'Banka Havalesi',
           bankDesc: 'Doğrudan banka havalesi veya EFT',
           cash: 'Nakit',
@@ -560,7 +581,12 @@ const resources = {
             monthly: 'Aylık',
             quarterly: '3 Aylık',
             yearly: 'Yıllık'
-          }
+          },
+          startDate: 'Başlangıç Tarihi',
+          endDate: 'Bitiş Tarihi',
+          selectStartDate: 'Başlangıç tarihi seç',
+          selectEndDate: 'Bitiş tarihi seç',
+          paymentMethod: 'Ödeme Yöntemi'
         },
         filter: {
           sortBy: 'Sıralama',

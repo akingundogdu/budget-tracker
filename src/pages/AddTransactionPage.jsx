@@ -13,6 +13,7 @@ import CategorySelect from '../components/CategorySelect'
 import DatePicker from '../components/DatePicker'
 import ReminderSelect from '../components/ReminderSelect'
 import PaymentMethodSelect from '../components/PaymentMethodSelect'
+import RecurringTransactionForm from '../components/RecurringTransactionForm'
 import i18n from '../i18n'
 import { useTranslation } from 'react-i18next'
 
@@ -36,16 +37,11 @@ function AddTransactionPage() {
   })
   const [isRegular, setIsRegular] = useState(false)
   const [regularPeriod, setRegularPeriod] = useState('monthly')
+  const [regularStartDate, setRegularStartDate] = useState(null)
+  const [regularEndDate, setRegularEndDate] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPaymentMethodSelect, setShowPaymentMethodSelect] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
-
-  const periods = useMemo(() => [
-    { id: 'weekly', label: t('expenses.form.regularPeriod.weekly') },
-    { id: 'monthly', label: t('expenses.form.regularPeriod.monthly') },
-    { id: 'quarterly', label: t('expenses.form.regularPeriod.quarterly') },
-    { id: 'yearly', label: t('expenses.form.regularPeriod.yearly') }
-  ], [t])
 
   const handleAmountChange = (e) => {
     let value = e.target.value
@@ -74,7 +70,6 @@ function AddTransactionPage() {
   }
 
   const handleAmountFocus = () => {
-    // When focusing, show the raw number for editing
     setDisplayAmount(amount)
   }
 
@@ -93,99 +88,170 @@ function AddTransactionPage() {
     setShowReminderSelect(false)
   }
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    return date.toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }
-
-  const formatReminderText = (settings) => {
-    if (!settings.enabled) return '';
-
-    let timeText = '';
-    if (settings.daysBeforeTransaction === 0) {
-      timeText = t('reminders.onTheDay');
-    } else if (settings.daysBeforeTransaction === 1) {
-      timeText = t('reminders.dayBefore');
-    } else if (settings.daysBeforeTransaction === 7) {
-      timeText = t('reminders.weekBefore');
-    } else {
-      timeText = t('reminders.daysBeforeFormat', { days: settings.daysBeforeTransaction });
-    }
-
-    let methodText = '';
-    if (settings.pushEnabled && settings.emailEnabled) {
-      methodText = t('reminders.notificationTypes.viaFormat.pushAndEmail');
-    } else if (settings.pushEnabled) {
-      methodText = t('reminders.notificationTypes.viaFormat.pushOnly');
-    } else if (settings.emailEnabled) {
-      methodText = t('reminders.notificationTypes.viaFormat.emailOnly');
-    }
-
-    return `${timeText} ${methodText}`;
-  }
-
-  // Check if form is valid
-  const isFormValid = useMemo(() => {
-    return amount && amount !== '0' && selectedCategory && selectedDate;
-  }, [amount, selectedCategory, selectedDate]);
-
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method)
     setShowPaymentMethodSelect(false)
   }
 
+  const formatDate = (date) => {
+    if (!date) return ''
+    return date.toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const formatReminderText = (settings) => {
+    if (!settings.enabled) return ''
+
+    let timeText = ''
+    if (settings.daysBeforeTransaction === 0) {
+      timeText = t('reminders.onTheDay')
+    } else if (settings.daysBeforeTransaction === 1) {
+      timeText = t('reminders.dayBefore')
+    } else if (settings.daysBeforeTransaction === 7) {
+      timeText = t('reminders.weekBefore')
+    } else {
+      timeText = t('reminders.daysBeforeFormat', { days: settings.daysBeforeTransaction })
+    }
+
+    let methodText = ''
+    if (settings.pushEnabled && settings.emailEnabled) {
+      methodText = t('reminders.notificationTypes.viaFormat.pushAndEmail')
+    } else if (settings.pushEnabled) {
+      methodText = t('reminders.notificationTypes.viaFormat.pushOnly')
+    } else if (settings.emailEnabled) {
+      methodText = t('reminders.notificationTypes.viaFormat.emailOnly')
+    }
+
+    return `${timeText} ${methodText}`
+  }
+
+  // Generate recurring transactions between start and end dates
+  const generateRecurringTransactions = (baseTransaction) => {
+    const transactions = []
+    let currentDate = new Date(regularStartDate)
+    const endDate = new Date(regularEndDate)
+
+    while (currentDate <= endDate) {
+      transactions.push({
+        ...baseTransaction,
+        date: new Date(currentDate).toISOString()
+      })
+
+      // Calculate next date based on period
+      switch (regularPeriod) {
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7)
+          break
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1)
+          break
+        case 'quarterly':
+          currentDate.setMonth(currentDate.getMonth() + 3)
+          break
+        case 'yearly':
+          currentDate.setFullYear(currentDate.getFullYear() + 1)
+          break
+      }
+    }
+
+    return transactions
+  }
+
+  // Check if form is valid
+  const isFormValid = useMemo(() => {
+    const hasAmount = amount && parseFloat(amount) > 0
+    const hasCategory = selectedCategory !== null
+    const hasDate = selectedDate !== null
+    
+    if (!isRegular) {
+      return hasAmount && hasCategory && hasDate
+    }
+    
+    // Additional validation for recurring transactions
+    return hasAmount && hasCategory && regularStartDate && regularEndDate && regularStartDate <= regularEndDate
+  }, [amount, selectedCategory, selectedDate, isRegular, regularStartDate, regularEndDate])
+
   const handleSave = async () => {
     try {
       if (!isFormValid) {
-        return;
+        return
       }
 
       setIsSubmitting(true)
 
-      // Create the transaction
-      const transaction = {
+      // Create the base transaction
+      const baseTransaction = {
         amount: parseFloat(amount),
         category: selectedCategory.id,
         type,
-        date: selectedDate.toISOString(),
+        date: selectedDate ? selectedDate.toISOString() : regularStartDate.toISOString(),
         is_regular: isRegular,
         regular_period: isRegular ? regularPeriod : null,
         description: selectedCategory.id === 'other' ? description : null,
-        payment_method: selectedPaymentMethod?.id || 'cash' // Default to cash if not selected
-      };
-
-      const savedTransaction = await budgetService.transactions.create(transaction);
-
-      // If reminder is enabled, create a reminder
-      if (reminderSettings.enabled) {
-        const reminderDate = new Date(selectedDate);
-        reminderDate.setDate(reminderDate.getDate() - reminderSettings.daysBeforeTransaction);
-
-        const reminder = {
-          transaction_id: savedTransaction.id,
-          reminder_date: reminderDate.toISOString(),
-          notification_type: reminderSettings.pushEnabled && reminderSettings.emailEnabled 
-            ? 'both' 
-            : reminderSettings.pushEnabled 
-              ? 'push' 
-              : 'email'
-        };
-
-        await budgetService.reminders.create(reminder);
+        payment_method: selectedPaymentMethod?.id || 'cash',
+        recurring_start_date: isRegular ? regularStartDate.toISOString() : null,
+        recurring_end_date: isRegular ? regularEndDate.toISOString() : null
       }
 
-      navigate(-1);
+      if (!isRegular) {
+        // Single transaction
+        const savedTransaction = await budgetService.transactions.create(baseTransaction)
+
+        // Create reminder if enabled
+        if (reminderSettings.enabled) {
+          const reminderDate = new Date(selectedDate)
+          reminderDate.setDate(reminderDate.getDate() - reminderSettings.daysBeforeTransaction)
+
+          const reminder = {
+            transaction_id: savedTransaction.id,
+            reminder_date: reminderDate.toISOString(),
+            notification_type: reminderSettings.pushEnabled && reminderSettings.emailEnabled 
+              ? 'both' 
+              : reminderSettings.pushEnabled 
+                ? 'push' 
+                : 'email'
+          }
+
+          await budgetService.reminders.create(reminder)
+        }
+      } else {
+        // Generate and save recurring transactions
+        const transactions = generateRecurringTransactions(baseTransaction)
+        
+        // Save all transactions
+        for (const transaction of transactions) {
+          const savedTransaction = await budgetService.transactions.create(transaction)
+
+          // Create reminder for each transaction if enabled
+          if (reminderSettings.enabled) {
+            const reminderDate = new Date(transaction.date)
+            reminderDate.setDate(reminderDate.getDate() - reminderSettings.daysBeforeTransaction)
+
+            const reminder = {
+              transaction_id: savedTransaction.id,
+              reminder_date: reminderDate.toISOString(),
+              notification_type: reminderSettings.pushEnabled && reminderSettings.emailEnabled 
+                ? 'both' 
+                : reminderSettings.pushEnabled 
+                  ? 'push' 
+                  : 'email'
+            }
+
+            await budgetService.reminders.create(reminder)
+          }
+        }
+      }
+
+      navigate(-1)
     } catch (error) {
-      console.error('Error saving transaction:', error);
-      // Show error
+      console.error('Error saving transaction:', error)
     } finally {
       setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <motion.div
@@ -217,6 +283,8 @@ function AddTransactionPage() {
                 inputMode="numeric"
                 value={displayAmount}
                 onChange={handleAmountChange}
+                onBlur={handleAmountBlur}
+                onFocus={handleAmountFocus}
                 className="w-full bg-transparent text-3xl text-white font-semibold focus:outline-none"
                 placeholder={formatMoney(0)}
               />
@@ -229,7 +297,7 @@ function AddTransactionPage() {
             className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4 flex items-center"
           >
             <div className="w-8 h-8 bg-gray-600/20 rounded-lg flex items-center justify-center mr-3">
-              {selectedCategory?.icon || '📁'}
+              {selectedCategory?.icon}
             </div>
             <span className="text-white/60">
               {selectedCategory ? t(`expenses.categories.${selectedCategory.id}`) : t('expenses.form.category')}
@@ -251,19 +319,33 @@ function AddTransactionPage() {
             </div>
           )}
 
-          {/* Date Selection */}
-          <button
-            onClick={() => setShowDatePicker(true)}
-            className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4 flex items-center"
-          >
-            <div className="w-8 h-8 bg-gray-600/20 rounded-lg flex items-center justify-center mr-3">
-              <CalendarIcon className="w-5 h-5 text-gray-400" />
-            </div>
-            <span className="text-white/60">
-              {selectedDate ? formatDate(selectedDate) : t('common.setDate')}
-            </span>
-            <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
-          </button>
+          {/* Regular Transaction Form */}
+          <RecurringTransactionForm
+            isRegular={isRegular}
+            regularPeriod={regularPeriod}
+            startDate={regularStartDate}
+            endDate={regularEndDate}
+            onStartDateChange={setRegularStartDate}
+            onEndDateChange={setRegularEndDate}
+            onPeriodChange={setRegularPeriod}
+            onRegularChange={setIsRegular}
+          />
+
+          {/* Date Selection - Only show for non-regular transactions */}
+          {!isRegular && (
+            <button
+              onClick={() => setShowDatePicker(true)}
+              className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4 flex items-center"
+            >
+              <div className="w-8 h-8 bg-gray-600/20 rounded-lg flex items-center justify-center mr-3">
+                <CalendarIcon className="w-5 h-5 text-gray-400" />
+              </div>
+              <span className="text-white/60">
+                {selectedDate ? formatDate(selectedDate) : t('common.setDate')}
+              </span>
+              <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
+            </button>
+          )}
 
           {/* Reminder Selection */}
           <button
@@ -293,60 +375,10 @@ function AddTransactionPage() {
               {selectedPaymentMethod?.icon || <CreditCardIcon className="w-5 h-5 text-gray-400" />}
             </div>
             <span className="text-white/60">
-              {selectedPaymentMethod ? t(`expenses.paymentMethods.${selectedPaymentMethod.id}`) : t('expenses.paymentMethods.select')}
+              {selectedPaymentMethod ? t(`expenses.paymentMethods.${selectedPaymentMethod.id}`) : t('expenses.form.paymentMethod')}
             </span>
             <ArrowLeftIcon className="w-5 h-5 text-white/60 rotate-180 ml-auto" />
           </button>
-
-          {/* Regular Transaction Toggle and Period Selection */}
-          <div className="w-full bg-[#1e2b4a] p-4 rounded-lg mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-white font-medium">
-                  {type === 'income' ? t('expenses.form.regularIncome') : t('expenses.form.regularExpense')}
-                </h3>
-                <p className="text-white/60 text-sm">
-                  {type === 'income' ? t('expenses.form.regularIncomeHint') : t('expenses.form.regularExpenseHint')}
-                </p>
-              </div>
-              <button
-                onClick={() => setIsRegular(!isRegular)}
-                className={`w-12 h-6 rounded-full transition-colors ${
-                  isRegular ? 'bg-primary' : 'bg-gray-600'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white transform transition-transform ${
-                    isRegular ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Period Selection - Only show when regular is enabled */}
-            {isRegular && (
-              <div className="mt-4">
-                <label className="block text-white/60 mb-2">
-                  {t('expenses.form.regularPeriod.title')}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {periods.map((period) => (
-                    <button
-                      key={period.id}
-                      onClick={() => setRegularPeriod(period.id)}
-                      className={`p-2 rounded-lg text-sm font-medium transition-colors ${
-                        regularPeriod === period.id
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-600/20 text-white/60 hover:bg-gray-600/40'
-                      }`}
-                    >
-                      {period.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Save Button */}
           <motion.button
@@ -372,8 +404,10 @@ function AddTransactionPage() {
         )}
         {showDatePicker && (
           <DatePicker
+            isOpen={showDatePicker}
             onClose={() => setShowDatePicker(false)}
             onSelect={handleDateSelect}
+            selectedDate={selectedDate}
           />
         )}
         {showReminderSelect && (

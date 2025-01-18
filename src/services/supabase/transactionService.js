@@ -1,187 +1,140 @@
-import { supabase } from '../../config/supabase';
+import { supabase } from './index'
 
-class TransactionService {
-  async getAll(filters = {}) {
-    const {
-      startDate,
-      endDate,
-      category,
-      type,
-      searchQuery,
-      sortBy = 'date',
-      sortOrder = 'desc',
-      page = 1,
-      limit = 10
-    } = filters;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    let query = supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range((page - 1) * limit, page * limit - 1);
-
-    if (startDate) {
-      query = query.gte('date', startDate);
-    }
-    if (endDate) {
-      query = query.lte('date', endDate);
-    }
-    if (category) {
-      query = query.eq('category', category);
-    }
-    if (type) {
-      query = query.eq('type', type);
-    }
-    if (searchQuery) {
-      query = query.ilike('category', `%${searchQuery}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
-  }
-
-  async getById(id) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error) throw error;
-    return data;
-  }
-
-  async create(transaction) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Ensure payment_method is one of the allowed values
-    const allowedPaymentMethods = ['credit_card', 'bank', 'cash'];
-    const paymentMethod = transaction.payment_method || 'cash';
+const transactionService = {
+  create: async (transaction) => {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
     
-    if (!allowedPaymentMethods.includes(paymentMethod)) {
-      throw new Error('Invalid payment method');
+    if (userError) {
+      throw userError
+    }
+
+    if (!user) {
+      throw new Error('User not authenticated')
     }
 
     const { data, error } = await supabase
       .from('transactions')
-      .insert([{
+      .insert({
         ...transaction,
-        is_regular: transaction.is_regular || false,
-        payment_method: paymentMethod,
         user_id: user.id
-      }])
-      .select();
+      })
+      .select()
+      .single()
 
-    if (error) throw error;
-    return data[0];
-  }
-
-  async update(id, transaction) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Ensure payment_method is one of the allowed values if it's being updated
-    if (transaction.payment_method) {
-      const allowedPaymentMethods = ['credit_card', 'bank', 'cash'];
-      if (!allowedPaymentMethods.includes(transaction.payment_method)) {
-        throw new Error('Invalid payment method');
-      }
+    if (error) {
+      throw error
     }
+
+    return data
+  },
+
+  getAll: async ({ type, page = 1, limit = 10 }) => {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError) {
+      throw userError
+    }
+
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const start = (page - 1) * limit
+    const end = start + limit - 1
 
     const { data, error } = await supabase
       .from('transactions')
-      .update(transaction)
-      .eq('id', id)
+      .select('*')
       .eq('user_id', user.id)
-      .select();
+      .eq('type', type)
+      .order('date', { ascending: false })
+      .range(start, end)
 
-    if (error) throw error;
-    return data[0];
-  }
+    if (error) {
+      throw error
+    }
 
-  async delete(id) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    return data
+  },
+
+  getStats: async () => {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError) {
+      throw userError
+    }
+
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const today = new Date()
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+    // Get regular transactions for this month
+    const { data: regularTransactions, error: regularError } = await supabase
+      .from('transactions')
+      .select('amount, type')
+      .eq('user_id', user.id)
+      .eq('is_regular', true)
+      .gte('recurring_start_date', firstDayOfMonth.toISOString())
+      .lte('recurring_end_date', lastDayOfMonth.toISOString())
+
+    // Get non-regular transactions for this month
+    const { data: nonRegularTransactions, error: nonRegularError } = await supabase
+      .from('transactions')
+      .select('amount, type')
+      .eq('user_id', user.id)
+      .eq('is_regular', false)
+      .gte('date', firstDayOfMonth.toISOString())
+      .lte('date', lastDayOfMonth.toISOString())
+
+    if (regularError || nonRegularError) {
+      throw regularError || nonRegularError
+    }
+
+    const allTransactions = [...(regularTransactions || []), ...(nonRegularTransactions || [])]
+
+    const totalIncome = allTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0)
+
+    const totalExpenses = allTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0)
+
+    return {
+      totalIncome,
+      totalExpenses
+    }
+  },
+
+  delete: async (id) => {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError) {
+      throw userError
+    }
+
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
 
     const { error } = await supabase
       .from('transactions')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
 
-    if (error) throw error;
-  }
-
-  async getStats(filters = {}) {
-    const { startDate, endDate, category } = filters;
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    let query = supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user.id);
-
-    if (startDate) {
-      query = query.gte('date', startDate);
+    if (error) {
+      throw error
     }
-    if (endDate) {
-      query = query.lte('date', endDate);
-    }
-    if (category) {
-      query = query.eq('category', category);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-
-    const expenses = data.filter(t => t.type === 'expense');
-    const regularExpenses = expenses.filter(t => t.is_regular);
-
-    // Group regular expenses by period
-    const regularExpensesByPeriod = regularExpenses.reduce((acc, t) => {
-      const period = t.regular_period || 'monthly'; // Default to monthly for backward compatibility
-      if (!acc[period]) {
-        acc[period] = 0;
-      }
-      acc[period] += t.amount;
-      return acc;
-    }, {});
-
-    // Group by category
-    const byCategory = Object.values(data.reduce((acc, t) => {
-      const key = t.category;
-      if (!acc[key]) {
-        acc[key] = {
-          category: t.category,
-          amount: 0,
-          count: 0
-        };
-      }
-      acc[key].amount += t.amount;
-      acc[key].count += 1;
-      return acc;
-    }, {}));
-
-    return {
-      totalIncome: data.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-      totalExpenses: expenses.reduce((sum, t) => sum + t.amount, 0),
-      regularExpenses: regularExpenses.reduce((sum, t) => sum + t.amount, 0),
-      regularExpensesByPeriod,
-      byCategory
-    };
   }
 }
 
-export default new TransactionService(); 
+export default transactionService 
