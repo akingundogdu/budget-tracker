@@ -242,17 +242,30 @@ const resources = {
           paymentMethod: 'Payment Method'
         },
         filter: {
+          title: 'Filters',
+          active: 'Active',
+          date: 'Date Range',
+          category: 'Categories',
+          reset: 'Reset Filters',
           sortBy: 'Sort by',
           dateDesc: 'Latest first',
           dateAsc: 'Oldest first',
           amountDesc: 'Highest amount',
           amountAsc: 'Lowest amount',
           dateRange: {
+            title: 'Date Range',
             all: 'All time',
             today: 'Today',
             week: 'This week',
             month: 'This month',
-            year: 'This year'
+            year: 'This year',
+            custom: 'Custom range'
+          },
+          regularity: {
+            title: 'Transaction Type',
+            all: 'All types',
+            regular: 'Regular',
+            oneTime: 'One-time'
           }
         },
         deleteTitle: 'Delete Transaction',
@@ -591,17 +604,30 @@ const resources = {
           paymentMethod: 'Ödeme Yöntemi'
         },
         filter: {
+          title: 'Filtreler',
+          active: 'Aktif',
+          date: 'Tarih Aralığı',
+          category: 'Kategoriler',
+          reset: 'Filtreleri Sıfırla',
           sortBy: 'Sıralama',
           dateDesc: 'En yeni',
           dateAsc: 'En eski',
           amountDesc: 'En yüksek tutar',
           amountAsc: 'En düşük tutar',
           dateRange: {
+            title: 'Tarih Aralığı',
             all: 'Tüm zamanlar',
             today: 'Bugün',
             week: 'Bu hafta',
             month: 'Bu ay',
-            year: 'Bu yıl'
+            year: 'Bu yıl',
+            custom: 'Özel aralık'
+          },
+          regularity: {
+            title: 'İşlem Tipi',
+            all: 'Tüm tipler',
+            regular: 'Düzenli',
+            oneTime: 'Tek seferlik'
           }
         },
         deleteTitle: 'İşlemi Sil',

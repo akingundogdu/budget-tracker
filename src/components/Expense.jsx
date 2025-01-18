@@ -8,11 +8,13 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { budgetService } from '../services'
 import ExpensesList from './ExpensesList'
+import ExpenseHeader from './ExpenseHeader'
+import { useFilterStore } from '../store/filterStore'
 
 function Expense() {
   const navigate = useNavigate()
-  const { formatMoney } = useLanguage()
   const { t } = useTranslation()
+  const { dateFilter } = useFilterStore()
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTransactionTab') || 'expense'
   })
@@ -23,7 +25,7 @@ function Expense() {
 
   useEffect(() => {
     fetchStats()
-  }, [activeTab])
+  }, [activeTab, dateFilter])
 
   useEffect(() => {
     localStorage.setItem('activeTransactionTab', activeTab)
@@ -31,12 +33,16 @@ function Expense() {
 
   const fetchStats = async () => {
     try {
-      // Get current month's date range
-      const today = new Date()
-      const startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
-      const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
+      const params = {}
 
-      const stats = await budgetService.transactions.getStats({ startDate, endDate })
+      // Only add date range if not filtering for all time
+      if (dateFilter.type !== 'all') {
+        const today = new Date()
+        params.startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+        params.endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
+      }
+
+      const stats = await budgetService.transactions.getStatsForExpense(params)
       setStats({
         totalAmount: activeTab === 'expense' ? stats.totalExpenses : stats.totalIncome,
         totalBudget: stats.totalIncome
@@ -62,16 +68,11 @@ function Expense() {
     >      
       <div className="min-h-screen bg-[#0f172a] pt-6">
         {/* Header */}
-        <div className="p-6 pb-8">
-          <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-2">{formatMoney(stats.totalAmount)}</h1>
-            <p className="text-white/60">
-              {activeTab === 'expense' 
-                ? `${spentPercentage.toFixed(0)}% ${t('expenses.budgetSpent')}`
-                : t('expenses.monthlyIncome')}
-            </p>
-          </div>
-        </div>
+        <ExpenseHeader 
+          totalAmount={stats.totalAmount}
+          spentPercentage={spentPercentage}
+          activeTab={activeTab}
+        />
 
         {/* Main Content */}
         <div className="bg-[#162036] min-h-screen rounded-t-3xl p-6">

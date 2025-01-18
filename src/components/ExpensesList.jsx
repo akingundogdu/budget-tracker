@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useTranslation } from 'react-i18next'
 import { Loading } from './Loading'
-import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../constants/categories'
 import { useState, useEffect } from 'react'
 import { budgetService } from '../services'
@@ -10,6 +10,8 @@ import EmptyState from './EmptyState'
 import { notify } from './Notifier'
 import ConfirmDialog from './ConfirmDialog'
 import { useLongPress } from '@uidotdev/usehooks'
+import ExpenseFilters from './ExpenseFilters'
+import { useFilterStore } from '../store/filterStore'
 
 function ExpenseItem({ expense, onDelete }) {
   const { formatMoney } = useLanguage()
@@ -122,26 +124,53 @@ function ExpensesList({ type }) {
   const [hasMore, setHasMore] = useState(true)
   const ITEMS_PER_PAGE = 10
 
+  const { dateFilter, regularityFilter, categoryFilter } = useFilterStore()
+
   useEffect(() => {
     setExpenses([])
     setPage(1)
     setHasMore(true)
     fetchTransactions(1, true)
-  }, [type])
+    console.log(dateFilter, regularityFilter, categoryFilter, "dateFilter")
+  }, [type, dateFilter, regularityFilter, categoryFilter])
 
   const fetchTransactions = async (pageNum, reset = false) => {
     try {
       setLoading(true)
-      const transactions = await budgetService.transactions.getAll({ 
+      
+      // Prepare filter parameters
+      const filterParams = {
         type,
         page: pageNum,
         limit: ITEMS_PER_PAGE
-      })
-      
+      }
+
+      // Add date filter
+      if (dateFilter.type !== 'all') {
+        filterParams.startDate = dateFilter.startDate ? new Date(dateFilter.startDate).toISOString() : undefined
+        filterParams.endDate = dateFilter.endDate ? new Date(dateFilter.endDate).toISOString() : undefined
+      }
+
+      // Add regularity filter
+      if (regularityFilter.type !== 'all') {
+        filterParams.isRegular = regularityFilter.type === 'regular'
+        if (regularityFilter.type === 'regular' && regularityFilter.period) {
+          filterParams.regularPeriod = regularityFilter.period
+        }
+      }
+
+      // Add category filter
+      if (categoryFilter.categories.length > 0) {
+        filterParams.categories = categoryFilter.categories
+      }
+
+      const transactions = await budgetService.transactions.getAllForExpense(filterParams)
+    
       setExpenses(prev => reset ? transactions : [...prev, ...transactions])
       setHasMore(transactions.length === ITEMS_PER_PAGE)
     } catch (error) {
       console.error('Error fetching transactions:', error)
+      notify.error(t('expenses.fetchError'))
     } finally {
       setLoading(false)
     }
@@ -165,6 +194,10 @@ function ExpensesList({ type }) {
 
   return (
     <div className="space-y-4">
+      {/* Filters */}
+      <ExpenseFilters type={type} />
+
+      {/* Expenses List */}
       <AnimatePresence>
         {loading && page === 1 ? (
           <div className="flex items-center justify-center py-8">

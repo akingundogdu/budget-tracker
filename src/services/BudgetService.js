@@ -38,7 +38,7 @@ class BudgetService {
 
       const { startDate, endDate, page = 1, limit = 10 } = filters;
       
-      const transactions = await this.transactions.getAll({
+      const transactions = await this.transactions.getAllForDashboard({
         startDate,
         endDate,
         page,
