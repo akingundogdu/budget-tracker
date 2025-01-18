@@ -13,7 +13,8 @@ function ExpenseHeader({ activeTab }) {
   const categoryFilter = useFilterStore(state => state.categoryFilter)
   const [stats, setStats] = useState({
     totalAmount: 0,
-    totalBudget: 0
+    totalBudget: 0,
+    overallTotal: 0
   })
 
   // Combine all filter states into a single dependency
@@ -31,11 +32,9 @@ function ExpenseHeader({ activeTab }) {
 
   const formatDateToISOString = (date) => {
     if (!date) return null
-    // Eğer date zaten string ise ve ISO formatında ise, direkt döndür
     if (typeof date === 'string' && date.includes('T')) {
       return date
     }
-    // Date objesi oluştur ve ISO string'e çevir
     return new Date(date).toISOString()
   }
 
@@ -48,7 +47,6 @@ function ExpenseHeader({ activeTab }) {
       // Handle different date filter scenarios
       switch (filterState.dateFilter.type) {
         case 'all':
-          // No date filters for all time
           break
         case 'current_month':
           const today = new Date()
@@ -76,10 +74,19 @@ function ExpenseHeader({ activeTab }) {
         queryParams.categories = filterState.categoryFilter.categories
       }
 
-      const stats = await budgetService.transactions.getStatsForExpense(queryParams)
+      // Get filtered stats
+      const filteredStats = await budgetService.transactions.getStatsForExpense(queryParams)
+
+      // Get total stats without date filters
+      const totalQueryParams = { ...queryParams }
+      delete totalQueryParams.startDate
+      delete totalQueryParams.endDate
+      const totalStats = await budgetService.transactions.getStatsForExpense(totalQueryParams)
+
       setStats({
-        totalAmount: filterState.activeTab === 'expense' ? stats.totalExpenses : stats.totalIncome,
-        totalBudget: stats.totalIncome
+        totalAmount: filterState.activeTab === 'expense' ? filteredStats.totalExpenses : filteredStats.totalIncome,
+        totalBudget: filteredStats.totalIncome,
+        overallTotal: filterState.activeTab === 'expense' ? totalStats.totalExpenses : totalStats.totalIncome
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -87,15 +94,14 @@ function ExpenseHeader({ activeTab }) {
   }
 
   const spentPercentage = stats.totalBudget === 0 ? 0 : (stats.totalAmount / stats.totalBudget) * 100
+  const filteredPercentage = stats.overallTotal === 0 ? 0 : (stats.totalAmount / stats.overallTotal) * 100
 
   return (
     <div className="p-6 pb-8">
       <div className="text-center text-white">
         <h1 className="text-4xl font-bold mb-2">{formatMoney(stats.totalAmount)}</h1>
         <p className="text-white/60">
-          {activeTab === 'expense' 
-            ? `${spentPercentage.toFixed(0)}% ${t('expenses.budgetSpent')}`
-            : t('expenses.monthlyIncome')}
+          {`${filteredPercentage.toFixed(0)}% ${t('expenses.budgetSpent')} (${formatMoney(stats.overallTotal)})`}
         </p>
       </div>
     </div>
