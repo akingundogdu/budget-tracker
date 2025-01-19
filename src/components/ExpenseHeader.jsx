@@ -41,26 +41,12 @@ function ExpenseHeader({ activeTab }) {
   const fetchStats = async () => {
     try {
       let queryParams = {
-        type: filterState.activeTab
+        type: filterState.activeTab,
+        startDate: filterState.dateFilter.startDate,
+        endDate: filterState.dateFilter.endDate
       }
 
-      // Handle different date filter scenarios
-      switch (filterState.dateFilter.type) {
-        case 'all':
-          break
-        case 'current_month':
-          const today = new Date()
-          queryParams.startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
-          queryParams.endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
-          break
-        case 'custom':
-          if (filterState.dateFilter.startDate && filterState.dateFilter.endDate) {
-            queryParams.startDate = formatDateToISOString(filterState.dateFilter.startDate)
-            queryParams.endDate = formatDateToISOString(filterState.dateFilter.endDate)
-          }
-          break
-      }
-
+    
       // Add regularity filters
       if (filterState.regularityFilter.type !== 'all') {
         queryParams.isRegular = filterState.regularityFilter.type === 'regular'
@@ -75,13 +61,15 @@ function ExpenseHeader({ activeTab }) {
       }
 
       // Get filtered stats
-      const filteredStats = await budgetService.transactions.getStatsForExpense(queryParams)
-
-      // Get total stats without date filters
-      const totalQueryParams = { ...queryParams }
-      delete totalQueryParams.startDate
-      delete totalQueryParams.endDate
-      const totalStats = await budgetService.transactions.getStatsForExpense(totalQueryParams)
+      const filteredStats = await budgetService.transactions.getStatsForExpense(queryParams);   
+      
+      
+      const startDate = new Date(new Date().getFullYear(), 0, 1).toISOString();
+      const endDate = new Date(new Date().getFullYear(), 11, 31).toISOString();
+      const totalStats = await budgetService.transactions.getStatsForExpense({
+        startDate,
+        endDate
+      });
 
       setStats({
         totalAmount: filterState.activeTab === 'expense' ? filteredStats.totalExpenses : filteredStats.totalIncome,

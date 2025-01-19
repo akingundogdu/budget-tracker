@@ -106,12 +106,13 @@ const transactionService = {
       if (startDate) {
         query = query.gte('date', startDate)
       }
+  
       if (endDate) {
         query = query.lte('date', endDate)
       }
 
-      if (isRegular) {
-        query = query.eq('is_regular', true)
+      if (isRegular !== undefined) {
+        query = query.eq('is_regular', isRegular)
       }
 
       if (regularPeriod) {
@@ -124,8 +125,7 @@ const transactionService = {
 
 
     // Apply pagination
-    query = query.range(start, end)
-
+    query = query.range(start, end);
       const { data, error } = await query
 
     if (error) {
@@ -160,8 +160,8 @@ const transactionService = {
         .from('transactions')
         .select('amount, type, is_regular')
         .eq('user_id', user.id)
-.gte('date', startDate)
-      .lte('date', endDate)
+        .gte('date', startDate)
+        .lte('date', endDate)
 
     if (error) {
       throw error

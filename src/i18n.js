@@ -48,6 +48,17 @@ const resources = {
           },
           setDate: 'Set Date'
         },
+        dateFormat: {
+          today: 'Today',
+          yesterday: 'Yesterday',
+          tomorrow: 'Tomorrow',
+          daysAgo: '{{days}} days ago',
+          inDays: 'in {{days}} days',
+          thisMonth: 'This month',
+          lastMonth: 'Last month',
+          longDate: '{{month}} {{day}}, {{year}}',
+          shortDate: '{{month}} {{day}}'
+        },
         auth: {
           login: {
             title: 'Login',
@@ -132,6 +143,18 @@ const resources = {
             10: 'October',
             11: 'November',
             12: 'December'
+          },
+          dateRange: {
+            title: 'Date Range',
+            all: 'All time',
+            today: 'Today',
+            week: 'This week',
+            month: 'This month',
+            lastMonth: 'Last month',
+            nextMonth: 'Next month',
+            year: 'This year',
+            lastYear: 'Last year',
+            custom: 'Custom range'
           }
         }
       },
@@ -240,6 +263,8 @@ const resources = {
           endDate: 'End Date',
           selectStartDate: 'Select start date',
           selectEndDate: 'Select end date',
+          untilEndOfYear: 'Until end of year',
+          oneYear: '1 year',
           paymentMethod: 'Payment Method'
         },
         filter: {
@@ -259,7 +284,10 @@ const resources = {
             today: 'Today',
             week: 'This week',
             month: 'This month',
+            lastMonth: 'Last month',
+            nextMonth: 'Next month',
             year: 'This year',
+            lastYear: 'Last year',
             custom: 'Custom range'
           },
           regularity: {
@@ -411,6 +439,17 @@ const resources = {
           },
           setDate: 'Tarih Seç'
         },
+        dateFormat: {
+          today: 'Bugün',
+          yesterday: 'Dün',
+          tomorrow: 'Yarın',
+          daysAgo: '{{days}} gün önce',
+          inDays: '{{days}} gün içinde',
+          thisMonth: 'Bu ay',
+          lastMonth: 'Geçen ay',
+          longDate: '{{day}} {{month}} {{year}}',
+          shortDate: '{{day}} {{month}}'
+        },
         auth: {
           login: {
             title: 'Giriş',
@@ -495,6 +534,18 @@ const resources = {
             10: 'Ekim',
             11: 'Kasım',
             12: 'Aralık'
+          },
+          dateRange: {
+            title: 'Tarih Aralığı',
+            all: 'Tüm zamanlar',
+            today: 'Bugün',
+            week: 'Bu hafta',
+            month: 'Bu ay',
+            lastMonth: 'Geçen ay',
+            nextMonth: 'Gelecek ay',
+            year: 'Bu yıl',
+            lastYear: 'Geçen yıl',
+            custom: 'Özel aralık'
           }
         }
       },
@@ -603,6 +654,8 @@ const resources = {
           endDate: 'Bitiş Tarihi',
           selectStartDate: 'Başlangıç tarihi seç',
           selectEndDate: 'Bitiş tarihi seç',
+          untilEndOfYear: 'Yıl sonuna kadar',
+          oneYear: '1 yıl',
           paymentMethod: 'Ödeme Yöntemi'
         },
         filter: {
@@ -622,7 +675,10 @@ const resources = {
             today: 'Bugün',
             week: 'Bu hafta',
             month: 'Bu ay',
+            lastMonth: 'Geçen ay',
+            nextMonth: 'Gelecek ay',
             year: 'Bu yıl',
+            lastYear: 'Geçen yıl',
             custom: 'Özel aralık'
           },
           regularity: {

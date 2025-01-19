@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import DatePicker from './DatePicker'
@@ -17,6 +17,13 @@ function RecurringTransactionForm({
   const [showStartDatePicker, setShowStartDatePicker] = useState(false)
   const [showEndDatePicker, setShowEndDatePicker] = useState(false)
 
+  // Set current date as default start date when isRegular becomes true
+  useEffect(() => {
+    if (isRegular && !startDate) {
+      onStartDateChange(new Date())
+    }
+  }, [isRegular])
+
   const periods = [
     { id: 'weekly', label: t('expenses.form.regularPeriod.weekly') },
     { id: 'monthly', label: t('expenses.form.regularPeriod.monthly') },
@@ -31,6 +38,19 @@ function RecurringTransactionForm({
       month: 'long',
       day: 'numeric'
     })
+  }
+
+  const handleEndOfYearSelect = () => {
+    const endOfYear = new Date(new Date().getFullYear(), 11, 31) // December 31st of current year
+    onEndDateChange(endOfYear)
+  }
+
+  const handleOneYearSelect = () => {
+    if (!startDate) return
+
+    const oneYearFromStart = new Date(startDate)
+    oneYearFromStart.setFullYear(oneYearFromStart.getFullYear() + 1)
+    onEndDateChange(oneYearFromStart)
   }
 
   return (
@@ -101,6 +121,23 @@ function RecurringTransactionForm({
             <label className="block text-white/60 mb-2">
               {t('expenses.form.endDate')}
             </label>
+            {/* Quick Selection Buttons */}
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <button
+                type="button"
+                onClick={handleEndOfYearSelect}
+                className="p-2 rounded-lg text-sm font-medium bg-gray-600/20 text-white/60 hover:bg-gray-600/40"
+              >
+                {t('expenses.form.untilEndOfYear')}
+              </button>
+              <button
+                type="button"
+                onClick={handleOneYearSelect}
+                className="p-2 rounded-lg text-sm font-medium bg-gray-600/20 text-white/60 hover:bg-gray-600/40"
+              >
+                {t('expenses.form.oneYear')}
+              </button>
+            </div>
             <button
               onClick={() => setShowEndDatePicker(true)}
               className="w-full bg-[#243351] p-3 rounded-lg text-left text-white/60 hover:bg-[#2d3c5d]"

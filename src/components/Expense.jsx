@@ -1,58 +1,24 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useLanguage } from '../contexts/LanguageContext'
 import {
   PlusIcon,
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { budgetService } from '../services'
 import ExpensesList from './ExpensesList'
 import ExpenseHeader from './ExpenseHeader'
-import { useFilterStore } from '../store/filterStore'
-
+  
 function Expense() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { dateFilter } = useFilterStore()
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTransactionTab') || 'expense'
   })
-  const [stats, setStats] = useState({
-    totalAmount: 0,
-    totalBudget: 0
-  })
-
-  useEffect(() => {
-    fetchStats()
-  }, [activeTab, dateFilter])
 
   useEffect(() => {
     localStorage.setItem('activeTransactionTab', activeTab)
   }, [activeTab])
 
-  const fetchStats = async () => {
-    try {
-      const params = {}
-
-      // Only add date range if not filtering for all time
-      if (dateFilter.type !== 'all') {
-        const today = new Date()
-        params.startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
-        params.endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString()
-      }
-
-      const stats = await budgetService.transactions.getStatsForExpense(params)
-      setStats({
-        totalAmount: activeTab === 'expense' ? stats.totalExpenses : stats.totalIncome,
-        totalBudget: stats.totalIncome
-      })
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-    }
-  }
-
-  const spentPercentage = stats.totalBudget === 0 ? 0 : (stats.totalAmount / stats.totalBudget) * 100
 
   const handleAddTransaction = () => {
     navigate(`/add-transaction/${activeTab}`)
@@ -69,8 +35,6 @@ function Expense() {
       <div className="min-h-screen bg-[#0f172a] pt-6">
         {/* Header */}
         <ExpenseHeader 
-          totalAmount={stats.totalAmount}
-          spentPercentage={spentPercentage}
           activeTab={activeTab}
         />
 

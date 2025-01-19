@@ -24,7 +24,6 @@ function ExpenseFilters({ type = 'expense' }) {
     setDateFilter,
     setRegularityFilter,
     setCategoryFilter,
-    resetFilters,
     triggerRefetch
   } = useFilterStore()
 
@@ -41,6 +40,10 @@ function ExpenseFilters({ type = 'expense' }) {
   const dateTypes = [
     { id: 'all', label: t('expenses.filter.dateRange.all') },
     { id: 'current_month', label: t('expenses.filter.dateRange.month') },
+    { id: 'last_month', label: t('expenses.filter.dateRange.lastMonth') },
+    { id: 'next_month', label: t('expenses.filter.dateRange.nextMonth') },
+    { id: 'current_year', label: t('expenses.filter.dateRange.year') },
+    { id: 'last_year', label: t('expenses.filter.dateRange.lastYear') },
     { id: 'custom', label: t('expenses.filter.dateRange.custom') }
   ]
 
@@ -56,14 +59,53 @@ function ExpenseFilters({ type = 'expense' }) {
     { id: 'yearly', label: t('expenses.form.regularPeriod.yearly') }
   ]
 
+  const getDateRange = (type) => {
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const currentMonth = today.getMonth()
+
+    switch (type) {
+      case 'current_month':
+        return {
+          startDate: new Date(currentYear, currentMonth, 1).toISOString(),
+          endDate: new Date(currentYear, currentMonth + 1, 0).toISOString()
+        }
+      case 'last_month':
+        return {
+          startDate: new Date(currentYear, currentMonth - 1, 1).toISOString(),
+          endDate: new Date(currentYear, currentMonth, 0).toISOString()
+        }
+      case 'next_month':
+        return {
+          startDate: new Date(currentYear, currentMonth + 1, 1).toISOString(),
+          endDate: new Date(currentYear, currentMonth + 2, 0).toISOString()
+        }
+      case 'current_year':
+        return {
+          startDate: new Date(currentYear, 0, 1).toISOString(),
+          endDate: new Date(currentYear, 11, 31).toISOString()
+        }
+      case 'last_year':
+        return {
+          startDate: new Date(currentYear - 1, 0, 1).toISOString(),
+          endDate: new Date(currentYear - 1, 11, 31).toISOString()
+        }
+      default:
+        return {
+          startDate: null,
+          endDate: null
+        }
+    }
+  }
+
   const handleDateTypeChange = (type) => {
-    if (type === 'current_month') {
-      const today = new Date()
-      const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
-      const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-      setDraftDateFilter({ type, startDate, endDate })
-    } else {
+    if (type === 'all') {
+      setDraftDateFilter({ type, startDate: null, endDate: null })
+    } else if (type === 'custom') {
       setDraftDateFilter({ ...draftDateFilter, type })
+    } else {
+      const { startDate, endDate } = getDateRange(type)
+      setDraftDateFilter({ type, startDate, endDate })
     }
   }
 
@@ -78,7 +120,7 @@ function ExpenseFilters({ type = 'expense' }) {
   }
 
   const handleRegularityTypeChange = (type) => {
-    setDraftRegularityFilter({ ...draftRegularityFilter, type })
+    setDraftRegularityFilter({ ...draftRegularityFilter, type, period: null })
   }
 
   const handlePeriodChange = (period) => {
@@ -159,12 +201,12 @@ function ExpenseFilters({ type = 'expense' }) {
                 {/* Date Filter */}
                 <div>
                   <h3 className="text-white/60 mb-3">{t('expenses.filter.date')}</h3>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {dateTypes.map((dateType) => (
                       <button
                         key={dateType.id}
                         onClick={() => handleDateTypeChange(dateType.id)}
-                        className={`p-2 rounded-lg text-sm transition-colors
+                        className={`p-3 rounded-lg text-sm transition-colors
                           ${draftDateFilter?.type === dateType.id
                             ? 'bg-primary text-white'
                             : 'bg-[#243351] text-white/60 hover:bg-[#2d3c5d]'

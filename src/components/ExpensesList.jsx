@@ -37,6 +37,51 @@ function ExpenseItem({ expense, onDelete }) {
   const allCategories = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES]
   const categoryIcon = allCategories.find(cat => cat.id === expense.category)?.icon || '💰'
 
+  const formatDate = (date) => {
+    const today = new Date()
+    const expenseDate = new Date(date)
+    const diffTime = expenseDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    // Future dates
+    if (diffDays > 0) {
+      if (diffDays === 1) {
+        return t('common.dateFormat.tomorrow')
+      }
+      if (diffDays <= 7) {
+        return t('common.dateFormat.inDays', { days: diffDays })
+      }
+    }
+
+    // Past dates
+    const pastDiffDays = Math.abs(diffDays)
+    
+    // Today
+    if (pastDiffDays === 0) {
+      return t('common.dateFormat.today')
+    }
+    
+    // Yesterday
+    if (pastDiffDays === 1) {
+      return t('common.dateFormat.yesterday')
+    }
+    
+    // Within last 7 days
+    if (pastDiffDays > 1 && pastDiffDays <= 7) {
+      return t('common.dateFormat.daysAgo', { days: pastDiffDays })
+    }
+    
+    // Same month or different month
+    const sameYear = today.getFullYear() === expenseDate.getFullYear()
+    const month = t(`common.datePicker.months.${expenseDate.toLocaleString('en', { month: 'long' }).toLowerCase()}`)
+    const day = expenseDate.getDate()
+    const year = expenseDate.getFullYear()
+    
+    return sameYear
+      ? t('common.dateFormat.shortDate', { month, day })
+      : t('common.dateFormat.longDate', { month, day, year })
+  }
+
   const handleConfirmDelete = async () => {
     setIsDeleting(true)
     try {
@@ -82,7 +127,9 @@ function ExpenseItem({ expense, onDelete }) {
                 </span>
               )}
             </h3>
-            <p className="text-sm text-white/60">{new Date(expense.date).toLocaleDateString()}</p>
+            <p className="text-sm text-white/60">
+              {formatDate(expense.date)}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -131,7 +178,6 @@ function ExpensesList({ type }) {
     setPage(1)
     setHasMore(true)
     fetchTransactions(1, true)
-    console.log(dateFilter, regularityFilter, categoryFilter, "dateFilter")
   }, [type, dateFilter, regularityFilter, categoryFilter])
 
   const fetchTransactions = async (pageNum, reset = false) => {
@@ -147,18 +193,24 @@ function ExpensesList({ type }) {
 
       // Add date filter
       if (dateFilter.type !== 'all') {
-        filterParams.startDate = dateFilter.startDate ? new Date(dateFilter.startDate).toISOString() : undefined
-        filterParams.endDate = dateFilter.endDate ? new Date(dateFilter.endDate).toISOString() : undefined
+        filterParams.startDate = dateFilter.startDate ? dateFilter.startDate : undefined
+        filterParams.endDate = dateFilter.endDate ? dateFilter.endDate : undefined
       }
 
-      // Add regularity filter
-      if (regularityFilter.type !== 'all') {
-        filterParams.isRegular = regularityFilter.type === 'regular'
-        if (regularityFilter.type === 'regular' && regularityFilter.period) {
-          filterParams.regularPeriod = regularityFilter.period
-        }
+      console.log("filterParams", regularityFilter)
+      switch (regularityFilter.type) {
+        case 'one-time':
+            filterParams.isRegular = false;
+            break;
+        case 'regular':
+            filterParams.isRegular = true;
+            filterParams.regularPeriod = regularityFilter.period;
+            break;
+        default:
+            filterParams.isRegular = undefined;
+            break;
       }
-
+      
       // Add category filter
       if (categoryFilter.categories.length > 0) {
         filterParams.categories = categoryFilter.categories

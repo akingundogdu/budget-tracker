@@ -165,14 +165,15 @@ function AddTransactionPage() {
     const hasAmount = amount && parseFloat(amount) > 0
     const hasCategory = selectedCategory !== null
     const hasDate = selectedDate !== null
+    const hasPaymentMethod = selectedPaymentMethod !== null
     
     if (!isRegular) {
-      return hasAmount && hasCategory && hasDate
+      return hasAmount && hasCategory && hasDate && hasPaymentMethod
     }
     
     // Additional validation for recurring transactions
-    return hasAmount && hasCategory && regularStartDate && regularEndDate && regularStartDate <= regularEndDate
-  }, [amount, selectedCategory, selectedDate, isRegular, regularStartDate, regularEndDate])
+    return hasAmount && hasCategory && regularStartDate && regularEndDate && regularStartDate <= regularEndDate && hasPaymentMethod
+  }, [amount, selectedCategory, selectedDate, isRegular, regularStartDate, regularEndDate, selectedPaymentMethod])
 
   const handleSave = async () => {
     try {
