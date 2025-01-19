@@ -12,12 +12,14 @@ import ConfirmDialog from './ConfirmDialog'
 import { useLongPress } from '@uidotdev/usehooks'
 import ExpenseFilters from './ExpenseFilters'
 import { useFilterStore } from '../store/filterStore'
+import TransactionDetailsModal from './TransactionDetailsModal'
 
 function ExpenseItem({ expense, onDelete }) {
   const { formatMoney } = useLanguage()
   const { t } = useTranslation()
   const [isDeleting, setIsDeleting] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
 
   const longPressProps = useLongPress(
@@ -94,6 +96,22 @@ function ExpenseItem({ expense, onDelete }) {
     setIsDeleting(false)
   }
 
+  const handleDelete = async () => {
+    try {
+      await onDelete(expense.id)
+      notify.success(t('expenses.deleteSuccess'))
+    } catch (error) {
+      notify.error(t('expenses.deleteError'))
+      console.error('Error deleting expense:', error)
+    }
+  }
+
+  const handleClick = () => {
+    if (!isPressed) {
+      setShowDetailsModal(true)
+    }
+  }
+
   const expenseType = t(`expenses.categories.${expense.category}`)
   const confirmMessage = t('expenses.deleteConfirmation', { 
     type: expenseType, 
@@ -104,6 +122,7 @@ function ExpenseItem({ expense, onDelete }) {
     <>
       <motion.div
         {...longPressProps}
+        onClick={handleClick}
         initial={{ opacity: 0, y: 20 }}
         animate={{ 
           opacity: 1, 
@@ -158,6 +177,13 @@ function ExpenseItem({ expense, onDelete }) {
         message={confirmMessage}
         confirmText={t('expenses.deleteButton')}
         type="danger"
+      />
+
+      <TransactionDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        transaction={expense}
+        onDelete={handleDelete}
       />
     </>
   )

@@ -94,7 +94,8 @@ const resources = {
             passwordMatch: 'Passwords must match'
           }
         },
-        confirm: 'Confirm'
+        confirm: 'Confirm',
+        close: 'Close'
       },
       navigation: {
         dashboard: 'Dashboard',
@@ -301,7 +302,20 @@ const resources = {
         deleteButton: 'Delete',
         deleteConfirmation: 'Are you sure you want to delete {{type}} transaction of {{amount}}?',
         deleteSuccess: 'Transaction deleted successfully',
-        deleteError: 'Failed to delete transaction'
+        deleteError: 'Failed to delete transaction',
+        details: {
+          title: 'Transaction Details',
+          amount: 'Amount',
+          category: 'Category',
+          description: 'Description',
+          paymentMethod: 'Payment Method',
+          date: 'Date',
+          recurring: 'Recurring Period',
+          nextPayment: 'Next Payment',
+          notes: 'Notes',
+          type: 'Transaction Type',
+          endDate: 'End Date'
+        }
       },
       income: {
         addNew: 'Add New Income',
@@ -485,7 +499,8 @@ const resources = {
             passwordMatch: 'Şifreler eşleşmiyor'
           }
         },
-        confirm: 'Onayla'
+        confirm: 'Onayla',
+        close: 'Kapat'
       },
       navigation: {
         dashboard: 'Ana Sayfa',
@@ -692,7 +707,20 @@ const resources = {
         deleteButton: 'Sil',
         deleteConfirmation: '{{amount}} tutarındaki {{type}} işlemini silmek istediğinize emin misiniz?',
         deleteSuccess: 'İşlem başarıyla silindi',
-        deleteError: 'İşlem silinirken bir hata oluştu'
+        deleteError: 'İşlem silinirken bir hata oluştu',
+        details: {
+          title: 'İşlem Detayları',
+          amount: 'Tutar',
+          category: 'Kategori',
+          description: 'Açıklama',
+          paymentMethod: 'Ödeme Yöntemi',
+          date: 'Tarih',
+          recurring: 'Tekrar Periyodu',
+          nextPayment: 'Sonraki Ödeme',
+          notes: 'Notlar',
+          type: 'İşlem Tipi',
+          endDate: 'Bitiş Tarihi'
+        }
       },
       income: {
         addNew: 'Yeni Gelir Ekle',
