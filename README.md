@@ -8,7 +8,7 @@ A modern, feature-rich Progressive Web App (PWA) built with React and Supabase. 
 
 ### ✨ Experience Budget Tracker in Action
 
-[Watch Full Demo Video](https://github.com/akingundogdu/budget-tracker/blob/main/.github/assets/budget-tracker-app-demo.MP4)
+[Watch Full Demo Video](https://drive.google.com/file/d/1kt-mE0WilTwt_Qgp6dZbBXUWF1WEg4rc/view?usp=sharing)
 
 </div>
 
