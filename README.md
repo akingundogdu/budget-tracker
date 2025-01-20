@@ -239,7 +239,7 @@ src/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/budget-tracker.git
+   git clone https://github.com/akingundogdu/budget-tracker.git
    cd budget-tracker
    ```
 
