@@ -38,7 +38,7 @@ A modern, feature-rich Progressive Web App (PWA) built with React and Supabase. 
 - 🌐 Multi-language Support
 
 ### 🔗 Try It Yourself
-Visit our [live demo](https://your-demo-url.com) to experience the app firsthand!
+Visit our [live demo](https://budget-tracker-2hfy.onrender.com) to experience the app firsthand!
 
 ## Features
 
