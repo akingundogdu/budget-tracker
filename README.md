@@ -38,7 +38,117 @@ A modern, feature-rich Progressive Web App (PWA) built with React and Supabase. 
 - 🌐 Multi-language Support
 
 ### 🔗 Try It Yourself
-Visit our [live demo](https://budget-tracker-2hfy.onrender.com) to experience the app firsthand!
+Visit our [live demo](https://your-demo-url.com) to experience the app firsthand!
+
+## 📸 Screenshots
+
+### Authentication
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>Login Screen</h4>
+    <img src=".github/screenshots/1-login.PNG" width="250" alt="Login" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Registration Screen</h4>
+    <img src=".github/screenshots/2-register.PNG" width="250" alt="Register" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Password Reset Screen</h4>
+    <img src=".github/screenshots/3-reset-your-password.PNG" width="250" alt="Reset Password" />
+  </div>
+</div>
+
+### Dashboard & Overview
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>Main Dashboard View</h4>
+    <img src=".github/screenshots/4-dashboard.PNG" width="250" alt="Dashboard" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Detailed Dashboard Analysis</h4>
+    <img src=".github/screenshots/5-dashboard-detail.PNG" width="250" alt="Dashboard Detail" />
+  </div>
+</div>
+
+### Transaction Management
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>Income Transactions</h4>
+    <img src=".github/screenshots/6-incomes.PNG" width="250" alt="Incomes" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Transaction Deletion Dialog</h4>
+    <img src=".github/screenshots/7-delete-transaction.PNG" width="250" alt="Delete Transaction" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Income Filtering Options</h4>
+    <img src=".github/screenshots/8-income-filter.PNG" width="250" alt="Income Filter" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Transaction Details View</h4>
+    <img src=".github/screenshots/9-transaction-detail.PNG" width="250" alt="Transaction Detail" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Expense Transactions</h4>
+    <img src=".github/screenshots/10-expenses.PNG" width="250" alt="Expenses" />
+  </div>
+</div>
+
+### Filtering & Analysis
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>Expense Filter Interface</h4>
+    <img src=".github/screenshots/11-expense-filter.PNG" width="250" alt="Expense Filter" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Detailed Filter Options</h4>
+    <img src=".github/screenshots/12-expense-filter-detail.PNG" width="250" alt="Expense Filter Detail" />
+  </div>
+</div>
+
+### Adding New Transactions
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>New Expense Form</h4>
+    <img src=".github/screenshots/13-add-new-expense.PNG" width="250" alt="Add New Expense" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Category Selection</h4>
+    <img src=".github/screenshots/14-choose-category-for-new-expense.PNG" width="250" alt="Choose Category" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Recurring Transaction Setup</h4>
+    <img src=".github/screenshots/15-choose-regular-for-new-expense.PNG" width="250" alt="Choose Regular" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Reminder Configuration</h4>
+    <img src=".github/screenshots/16-choose-reminder.PNG" width="250" alt="Choose Reminder" />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <h4>Payment Method Selection</h4>
+    <img src=".github/screenshots/17-choose-payment-method.PNG" width="250" alt="Choose Payment Method" />
+  </div>
+</div>
+
+### User Settings
+<div align="center">
+  <div style="margin-bottom: 20px;">
+    <h4>Profile Settings Panel</h4>
+    <img src=".github/screenshots/18-profile-settings.PNG" width="250" alt="Profile Settings" />
+  </div>
+</div>
 
 ## Features
 
