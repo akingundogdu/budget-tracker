@@ -1,6 +1,6 @@
 # Budget Tracker
 
-A modern, feature-rich Progressive Web App (PWA) built with React and Supabase. Track your expenses, income, and manage your financial goals with an intuitive user interface. Install it on any device and use it like a native app, even offline!
+A modern, feature-rich Progressive Web App (PWA) built with React and Supabase. Track your expenses, income, and manage your financial goals with an intuitive user interface. Install it on any device and use it like a native app!
 
 ## 🎥 Demo
 
